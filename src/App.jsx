@@ -4,7 +4,7 @@ import ValentineCard from './components/ValentineCard'
 
 function App() {
   // Set this to true to show BirthdayCard, false to show ValentineCard
-  const isBirthday = false
+  const isBirthday = true
 
   return (
     <>
