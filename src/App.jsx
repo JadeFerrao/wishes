@@ -14,7 +14,6 @@ function App() {
 
   useEffect(() => {
     const checkShare = async () => {
-      // Get shareId from URL query parameters
       const params = new URLSearchParams(window.location.search)
       const shareId = params.get('shareId')
 
@@ -31,20 +30,17 @@ function App() {
         if (docSnap.exists()) {
           const data = docSnap.data()
           if (data.viewed) {
-            // Already viewed
             setViewState('denied')
           } else {
-            // Not viewed yet - mark as viewed and show content
             await updateDoc(docRef, { viewed: true })
             setViewState('allowed')
           }
         } else {
-          // Document does not exist
           setViewState('denied')
         }
       } catch (error) {
         console.error("Error checking share link:", error)
-        setViewState('denied') // Fail safe to denied on error
+        setViewState('denied')
       }
     }
 
@@ -66,7 +62,7 @@ function App() {
   }
 
   if (viewState === 'loading') {
-    return <div style={{ color: 'white', textAlign: 'center', marginTop: '20%' }}>Checking magic link...</div>
+    return <div style={{ color: 'white', textAlign: 'center', marginTop: '20%' }}>Loading...</div>
   }
 
   if (viewState === 'denied') {
@@ -74,18 +70,12 @@ function App() {
       <div style={{ color: 'white', textAlign: 'center', marginTop: '20%', fontFamily: 'sans-serif' }}>
         <h1>This card has vanished.</h1>
         <p>This was a one-time magic moment.</p>
-        {/* <button onClick={() => window.location.href = window.location.pathname} style={{ marginTop: '20px', padding: '10px' }}>
-          Create New
-        </button> */}
       </div>
     )
   }
 
-  // 'allowed' = Someone viewing a valid link
-  // 'preview' = You (the creator) visiting the main site (No ID)
-  // 'denied' = Invalid or already viewed link
-
   const isAdmin = new URLSearchParams(window.location.search).get('status') === 'admin';
+  // adminURL: https://jadeferrao.github.io/wishes.github.io/?status=admin
 
   return (
     <>
@@ -94,7 +84,7 @@ function App() {
         isBirthday ? <BirthdayCard name="Jayden" /> : <ValentineCard />
       )}
 
-      {/* 2. PREVIEW: Show ONLY Generator (Secure Mode) */}
+      {/* 2. ADMIN: Show only Link Generator (Secure Mode) */}
       {viewState === 'preview' && (
         <div style={{
           display: 'flex',
@@ -102,7 +92,7 @@ function App() {
           alignItems: 'center',
           justifyContent: 'center',
           height: '100vh',
-          background: '#000', // Blank/Dark background
+          background: '#000',
           color: 'white'
         }}>
           {isAdmin ? (
@@ -160,7 +150,7 @@ function App() {
   )
 }
 
-// --- SIMPLE VERSION (Active) ---
+// --- SIMPLE VERSION ---
 // import './App.css'
 // import BirthdayCard from './components/BirthdayCard'
 // import ValentineCard from './components/ValentineCard'
