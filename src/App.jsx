@@ -1,27 +1,17 @@
-import { useState } from 'react'
 import './App.css'
 import BirthdayCard from './components/BirthdayCard'
-import ModeSwitch from './components/ModeSwitch'
+import ValentineCard from './components/ValentineCard'
 
 function App() {
-  const [mode, setMode] = useState('birthday')
+  // Set this to true to show BirthdayCard, false to show ValentineCard
+  const isBirthday = false
 
   return (
     <>
-      <ModeSwitch mode={mode} setMode={setMode} />
-
-      {mode === 'birthday' ? (
+      {isBirthday ? (
         <BirthdayCard name="Jayden" />
       ) : (
-        <div style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#ffeaa7'
-        }}>
-          <h1>Valentines Mode Coming Soon! 💖</h1>
-        </div>
+        <ValentineCard />
       )}
     </>
   )
