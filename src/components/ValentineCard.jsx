@@ -303,7 +303,7 @@ export default function ValentineCard() {
                         margin: '0 0 20px 0',
                         textAlign: 'center'
                     }}>
-                        My Dearest Idiot,
+                        Dearest Idiot,
                     </h2>
                     <p style={{
                         fontFamily: "'Dancing Script', cursive",

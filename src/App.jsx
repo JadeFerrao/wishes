@@ -7,7 +7,7 @@ import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from 'fir
 
 function App() {
   // Set this to true to show BirthdayCard, false to show ValentineCard
-  const isBirthday = false
+  const isBirthday = true
 
   const [viewState, setViewState] = useState('loading') // 'loading', 'allowed', 'denied', 'preview'
   const [generatedLink, setGeneratedLink] = useState('')
@@ -75,7 +75,7 @@ function App() {
   }
 
   const isAdmin = new URLSearchParams(window.location.search).get('status') === 'admin';
-  // adminURL: https://jadeferrao.github.io/wishes.github.io/?status=admin
+  // adminURL: https://jadeferrao.github.io/wishes/?status=admin
 
   return (
     <>
