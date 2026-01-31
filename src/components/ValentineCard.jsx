@@ -313,9 +313,9 @@ export default function ValentineCard() {
                         lineHeight: '1.6',
                         margin: 0
                     }}>
-                        Your reading this since you approved it , but yea saying this before someone else does, <br />
-                        You make my days better, unfortunately. <br />
-                        Thanks for being crazy, dumb, sassy, sweet, and impossible to ignore. <br />
+                        Your reading this since you approvd it ha-ha lol, you're officially stuck with me. <br />
+                        Now listen, You make my life a beautiful kind of chaotic, and I love every second of it. <br />
+                        Thanks for being crazy, dumb, sweet, impossible to ignore and my favorite person to be weird with.<br />
                         <br />
                         Your Crackhead, <br />
                         <span style={{ fontSize: isMobile ? '2rem' : '2.5rem', color: '#e91e63' }}>Jayden</span>
