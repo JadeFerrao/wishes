@@ -5,3 +5,48 @@
   padding: 0;
   text-align: center;
 }
+
+.magic-button {
+  padding: 15px 30px;
+  font-size: 18px;
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(255, 77, 77, 0.4);
+  transition: all 0.2s ease;
+}
+
+.magic-button:hover {
+  background: #ff3333;
+  box-shadow: 0 6px 20px rgba(255, 77, 77, 0.6);
+  transform: translateY(-2px);
+}
+
+.magic-button:active {
+  background: #cc0000;
+  box-shadow: 0 2px 5px rgba(255, 77, 77, 0.4);
+  transform: translateY(1px) scale(0.95);
+}
+
+.copy-button {
+  padding: 12px 20px;
+  background: #333;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copy-button:hover {
+  background: #444;
+  border-color: #666;
+  transform: translateY(-1px);
+}
+
+.copy-button:active {
+  background: #222;
+  transform: translateY(1px) scale(0.95);
+}

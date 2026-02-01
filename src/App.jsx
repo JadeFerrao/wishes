@@ -7,7 +7,7 @@ import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from 'fir
 
 function App() {
   // Set this to true to show BirthdayCard, false to show ValentineCard
-  const isBirthday = true
+  const isBirthday = false
 
   const [viewState, setViewState] = useState('loading') // 'loading', 'allowed', 'denied', 'preview'
   const [generatedLink, setGeneratedLink] = useState('')
@@ -98,16 +98,7 @@ function App() {
           {isAdmin ? (
             <>
               {!generatedLink ? (
-                <button onClick={generateLink} style={{
-                  padding: '15px 30px',
-                  fontSize: '18px',
-                  background: '#ff4d4d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '50px',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 15px rgba(255, 77, 77, 0.4)'
-                }}>
+                <button onClick={generateLink} className="magic-button">
                   Create Magic Link
                 </button>
               ) : (
@@ -128,14 +119,7 @@ function App() {
                     />
                     <button
                       onClick={() => navigator.clipboard.writeText(generatedLink)}
-                      style={{
-                        padding: '12px 20px',
-                        background: '#333',
-                        color: 'white',
-                        border: '1px solid #555',
-                        borderRadius: '8px',
-                        cursor: 'pointer'
-                      }}
+                      className="copy-button"
                     >
                       Copy
                     </button>

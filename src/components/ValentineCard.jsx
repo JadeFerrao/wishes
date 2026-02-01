@@ -233,7 +233,7 @@ export default function ValentineCard() {
                                 boxShadow: '0 10px 20px rgba(255, 154, 158, 0.4)'
                             }}
                         >
-                            Yes! 💖
+                            Yes 💖
                         </motion.button>
 
                         <button
@@ -250,7 +250,7 @@ export default function ValentineCard() {
                             }}
                             disabled
                         >
-                            No
+                            No 🥲
                         </button>
                     </div>
                 </div>
