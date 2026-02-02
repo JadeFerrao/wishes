@@ -1,13 +1,12 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import dummyImg from '../assets/dummy.png';
 
-// Using placeholders since actual images are not provided in the prompt.
-// Ideally, we would need 4 memory images.
 const placeholderImages = [
-    'https://images.unsplash.com/photo-1516575334481-f85287c2c81d?w=400&q=80', // Couple holding hands
-    'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=400&q=80', // Laughing
-    'https://images.unsplash.com/photo-1621600411688-4be93cd68504?w=400&q=80', // Date night
-    'https://images.unsplash.com/photo-1518199266791-5375a83190b9?w=400&q=80'  // Hearts/Cute
+    dummyImg,
+    dummyImg,
+    dummyImg,
+    dummyImg
 ];
 
 export default function Memories() {
