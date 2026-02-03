@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import ReactConfetti from 'react-confetti'
 
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { useWindowSize } from 'react-use'
@@ -19,6 +20,9 @@ export default function ValentineCard() {
     const [selectedDate, setSelectedDate] = useState(null)
     const [selectedGift, setSelectedGift] = useState(null)
 
+    const [notification, setNotification] = useState(null)
+    const [showConfetti, setShowConfetti] = useState(false)
+
     const { width, height } = useWindowSize()
     const audioRef = useRef(new Audio(song))
     const scrollRef = useRef(null)
@@ -37,6 +41,23 @@ export default function ValentineCard() {
         const y = Math.random() * 200 - 100
         setNoButtonPosition({ x, y })
         setNoButtonOpacity(prev => Math.max(0, prev - 0.2)) // Decrease opacity
+    }
+
+    const showNotificationMessage = (msg) => {
+        setNotification(msg)
+        setTimeout(() => setNotification(null), 3000)
+    }
+
+    const handleDateSelect = (date) => {
+        setSelectedDate(date)
+        showNotificationMessage("Added Date Idea to Bill 🧾")
+    }
+
+    const handleGiftSelect = (gift) => {
+        setSelectedGift(gift)
+        showNotificationMessage("Added Gift to Bill 🎁")
+        setShowConfetti(true)
+        setTimeout(() => setShowConfetti(false), 5000) // Stop confetti after 5s
     }
 
     // Floating hearts animation variants (existing)
@@ -101,6 +122,57 @@ export default function ValentineCard() {
             overflowX: 'hidden',
             overflowY: isCelebrated ? 'auto' : 'hidden', // Allow scroll only when celebrated
         }}>
+            {/* Confetti & Notifications */}
+            {showConfetti && (
+                <>
+                    <ReactConfetti
+                        width={width}
+                        height={height}
+                        recycle={true}
+                        numberOfPieces={300}
+                        confettiSource={{ x: 0, y: height / 2, w: 10, h: 10 }}
+                        initialVelocityX={20}
+                        style={{ position: 'fixed', top: 0, left: 0, zIndex: 9999, pointerEvents: 'none' }}
+                    />
+                    <ReactConfetti
+                        width={width}
+                        height={height}
+                        recycle={true}
+                        numberOfPieces={300}
+                        confettiSource={{ x: width, y: height / 2, w: 10, h: 10 }}
+                        initialVelocityX={-20}
+                        style={{ position: 'fixed', top: 0, left: 0, zIndex: 9999, pointerEvents: 'none' }}
+                    />
+                </>
+            )}
+
+            <AnimatePresence>
+                {notification && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -50, x: '-50%' }}
+                        animate={{ opacity: 1, y: 20 }}
+                        exit={{ opacity: 0, y: -50 }}
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: '50%',
+                            background: 'rgba(255, 255, 255, 0.9)',
+                            backdropFilter: 'blur(10px)',
+                            padding: '15px 30px',
+                            borderRadius: '50px',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                            zIndex: 10000,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            border: '2px solid #ff9a9e'
+                        }}
+                    >
+                        <span style={{ fontSize: '1.2rem' }}>✅</span>
+                        <span style={{ color: '#d63031', fontWeight: 'bold' }}>{notification}</span>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Initial Screen Container */}
             <div style={{
@@ -356,10 +428,10 @@ export default function ValentineCard() {
                     transition={{ duration: 1, delay: 0.5 }}
                 >
                     <div ref={scrollRef}>
-                        <DateIdeas selectedIdea={selectedDate} onSelect={setSelectedDate} />
+                        <DateIdeas selectedIdea={selectedDate} onSelect={handleDateSelect} />
                     </div>
 
-                    <GiftSelection selectedGift={selectedGift} onSelect={setSelectedGift} />
+                    <GiftSelection selectedGift={selectedGift} onSelect={handleGiftSelect} />
 
                     <Memories />
 

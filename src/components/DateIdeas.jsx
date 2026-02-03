@@ -17,7 +17,7 @@ export default function DateIdeas({ onSelect, selectedIdea }) {
   return (
     <div className="section-container" style={{ textAlign: 'center', padding: '40px 20px' }}>
       <h2 style={{ fontFamily: "'Dancing Script', cursive", color: '#d63031', fontSize: '2.5rem', marginBottom: '30px' }}>
-        Date Ideas with You 👉👈
+        Choose a Date Idea with You 👉👈
       </h2>
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
         {ideas.map((idea) => (
