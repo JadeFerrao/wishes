@@ -1,8 +1,61 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import html2canvas from 'html2canvas'
 
 export default function Cart({ selectedDate, selectedGift }) {
     const [status, setStatus] = useState('idle') // idle, generating, visible
+    const receiptRef = useRef(null)
+
+    const handleDownload = async () => {
+        if (!receiptRef.current) return
+
+        try {
+            const canvas = await html2canvas(receiptRef.current, {
+                scale: 2,
+                backgroundColor: null,
+            })
+
+            const link = document.createElement('a')
+            link.download = 'love-receipt.png'
+            link.href = canvas.toDataURL('image/png')
+            link.click()
+        } catch (err) {
+            console.error("Failed to generate receipt", err)
+        }
+    }
+
+    const handleShare = async () => {
+        if (!receiptRef.current) return
+
+        try {
+            const canvas = await html2canvas(receiptRef.current, {
+                scale: 2,
+                backgroundColor: null,
+            })
+
+            canvas.toBlob(async (blob) => {
+                if (!blob) return
+
+                const file = new File([blob], 'love-receipt.png', { type: 'image/png' })
+
+                if (navigator.share && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Love Receipt',
+                            text: 'Here is my Love Receipt! ❤️',
+                        })
+                    } catch (shareError) {
+                        console.error('Error sharing:', shareError)
+                    }
+                } else {
+                    alert('Sharing not supported on this device. Please use the download button instead!')
+                }
+            }, 'image/png')
+        } catch (err) {
+            console.error("Failed to generate receipt for sharing", err)
+        }
+    }
 
     const handleGenerate = () => {
         setStatus('generating')
@@ -141,6 +194,7 @@ export default function Cart({ selectedDate, selectedGift }) {
                         </motion.div>
                     ) : status === 'visible' && (
                         <motion.div
+                            ref={receiptRef}
                             key="receipt"
                             initial={{ y: -500 }}
                             animate={{ y: 0 }}
@@ -165,7 +219,7 @@ export default function Cart({ selectedDate, selectedGift }) {
                             }} />
 
                             <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                                <h2 style={{ margin: '0 0 10px 0', fontSize: '1.8rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Love Receipt</h2>
+                                <h2 style={{ margin: '0 0 10px 0', fontSize: '1.8rem', letterSpacing: '2px', textTransform: 'uppercase', color: '#f77777ff' }}>Love Receipt</h2>
                                 <div style={{ fontSize: '0.8rem', color: '#666' }}>Order #14022026</div>
                                 <div style={{ fontSize: '0.8rem', color: '#666' }}>Customer: My Valentine</div>
                             </div>
@@ -184,46 +238,27 @@ export default function Cart({ selectedDate, selectedGift }) {
                                 <tbody>
                                     {/* Item 1: Date */}
                                     <tr>
-                                        <td style={{ textAlign: 'left', color: 'black' }}>01</td>
-                                        <td style={{ fontWeight: 'bold' }}>
-                                            {selectedDate ? selectedDate.label.split('/')[0] : '...'}
+                                        <td style={{ textAlign: 'left', color: 'black', paddingTop: '10px' }}>01</td>
+                                        <td style={{ color: 'black', paddingTop: '10px' }}>
+                                            {selectedDate ? selectedDate.label : '...'}
                                         </td>
-                                        <td style={{ textAlign: 'left', color: 'black' }}>1</td>
-                                        <td style={{ textAlign: 'left', color: 'black' }}>FREE</td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td style={{ fontSize: '0.7rem', color: '#666', fontStyle: 'italic' }}>
-                                            {selectedDate ? 'Plan: ' + selectedDate.label : 'Pending selection'}
-                                        </td>
-                                        <td colSpan="2"></td>
+                                        <td style={{ textAlign: 'left', color: 'black', paddingTop: '10px' }}>1</td>
+                                        <td style={{ textAlign: 'left', color: 'black', paddingTop: '10px' }}>FREE</td>
                                     </tr>
 
                                     {/* Item 2: Gift */}
                                     <tr>
                                         <td style={{ textAlign: 'left', color: 'black' }}>02</td>
-                                        <td style={{ fontWeight: 'bold' }}>
-                                            {selectedGift ? selectedGift.content : '...'}
+                                        <td style={{ color: 'black' }}>
+                                            {selectedGift ? selectedGift.label : '...'}
                                         </td>
                                         <td style={{ textAlign: 'left', color: 'black' }}>1</td>
                                         <td style={{ textAlign: 'left', color: 'black' }}>FREE</td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td style={{ fontSize: '0.7rem', color: '#666', fontStyle: 'italic' }}>
-                                            Gift: {selectedGift ? selectedGift.label : 'Original'}
-                                        </td>
-                                        <td colSpan="2"></td>
                                     </tr>
                                 </tbody>
                             </table>
 
                             <div style={{ borderBottom: '2px dashed #333', marginBottom: '20px' }}></div>
-
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                                <span>TOTAL</span>
-                                <span>MY HEART</span>
-                            </div>
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px', fontSize: '0.9rem', color: '#666' }}>
                                 <span>TAX</span>
@@ -240,6 +275,62 @@ export default function Cart({ selectedDate, selectedGift }) {
                                     💗 💗 💗
                                 </div>
                             </div>
+
+                            {/* Download Action */}
+                            <motion.button
+                                data-html2canvas-ignore="true"
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={handleDownload}
+                                style={{
+                                    position: 'absolute',
+                                    bottom: '20px',
+                                    right: '25px',
+                                    background: '#dfe6e9',
+                                    border: 'none',
+                                    borderRadius: '50%',
+                                    width: '35px',
+                                    height: '35px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    fontSize: '1.2rem',
+                                    color: '#636e72',
+                                    zIndex: 100 // Ensure valid click
+                                }}
+                                title="Download Receipt"
+                            >
+                                📥
+                            </motion.button>
+
+                            {/* Share Action */}
+                            <motion.button
+                                data-html2canvas-ignore="true"
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={handleShare}
+                                style={{
+                                    position: 'absolute',
+                                    bottom: '20px',
+                                    right: '70px', // Positioned next to download
+                                    background: '#dfe6e9',
+                                    border: 'none',
+                                    borderRadius: '50%',
+                                    width: '35px',
+                                    height: '35px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    fontSize: '1.2rem',
+                                    color: '#636e72',
+                                    zIndex: 100
+                                }}
+                                title="Share Receipt"
+                            >
+                                🔗
+                            </motion.button>
                         </motion.div>
                     )}
                 </AnimatePresence>

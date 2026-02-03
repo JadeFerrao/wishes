@@ -9,7 +9,7 @@ export default function DateIdeas({ onSelect, selectedIdea }) {
   const ideas = [
     { id: 'virtual', label: 'Virtual chat/videocall', image: videocallImg },
     { id: 'dinner', label: 'Dinner date or Lunch date', image: dateImg },
-    { id: 'movie', label: 'An outing/Picnic date', image: outingImg },
+    { id: 'picnic', label: 'An outing/Picnic date', image: outingImg },
     { id: 'pics', label: 'Send pics to me so i simp shamelessely at home', image: selfiesImg },
     { id: 'netflix', label: 'Order food home & Netflix chill', image: netflixImg },
   ];
