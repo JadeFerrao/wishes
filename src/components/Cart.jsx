@@ -110,7 +110,6 @@ export default function Cart({ selectedDate, selectedGift }) {
                     style={{
                         width: '100%',
                         height: '40px',
-                        background: '#2d3436',
                         borderRadius: '15px',
                         boxShadow: '0 10px 20px rgba(0,0,0,0.3)',
                         zIndex: 20,

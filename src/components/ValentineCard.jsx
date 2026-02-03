@@ -337,7 +337,6 @@ export default function ValentineCard() {
                                                 color: '#636e72',
                                                 cursor: 'pointer',
                                                 fontWeight: 'bold',
-                                                fontWeight: 'bold',
                                                 // Make absolute once it starts moving so it doesn't take up space
                                                 position: noButtonOpacity < 1 ? 'absolute' : 'relative'
                                             }}
