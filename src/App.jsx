@@ -81,7 +81,7 @@ function App() {
     <>
       {/* 1. ALLOWED: Show the Card Content */}
       {viewState === 'allowed' && (
-        isBirthday ? <BirthdayCard name="Jayden" /> : <ValentineCard />
+        isBirthday ? <BirthdayCard name="Saviola" /> : <ValentineCard />
       )}
 
       {/* 2. ADMIN: Show only Link Generator (Secure Mode) */}
