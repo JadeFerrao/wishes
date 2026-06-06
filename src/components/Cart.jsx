@@ -261,7 +261,7 @@ export default function Cart({ selectedDate, selectedGift }) {
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px', fontSize: '0.9rem', color: '#666' }}>
                                 <span>TAX</span>
-                                <span>INCLUDED</span>
+                                <span>CUDDLES</span>
                             </div>
 
                             <div style={{ textAlign: 'center', fontSize: '0.9rem' }}>

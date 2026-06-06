@@ -4,6 +4,8 @@ import chocolateImg from '../assets/chocolate.png';
 import teddyImg from '../assets/teddy.png';
 import miniImg from '../assets/mini.png';
 import dressImg from '../assets/dress.png';
+import handbagImg from '../assets/handbag.jpeg';
+import perfumesImg from '../assets/perfumes.jpg';
 
 export default function GiftSelection({ onSelect, selectedGift }) {
     const [openedGifts, setOpenedGifts] = useState({});
@@ -13,6 +15,8 @@ export default function GiftSelection({ onSelect, selectedGift }) {
         { id: 'gift2', content: 'Miniatures', image: miniImg, label: 'Tiny Treaures' },
         { id: 'gift3', content: 'Teddy Bear', image: teddyImg, label: 'Cuddly Friend' },
         { id: 'gift4', content: 'Dress', image: dressImg, label: 'Stylish Pick' },
+        { id: 'gift5', content: 'Handbag', image: handbagImg, label: 'Fashion Carry' },
+        { id: 'gift6', content: 'Perfumes', image: perfumesImg, label: 'Fragrance Love' },
     ];
 
     const handleGiftClick = (gift) => {
@@ -29,9 +33,9 @@ export default function GiftSelection({ onSelect, selectedGift }) {
             </h2>
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 1fr', // Force 2 columns
+                gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: '30px',
-                maxWidth: '600px',
+                maxWidth: '800px',
                 margin: '0 auto'
             }}>
                 {gifts.map((gift) => {

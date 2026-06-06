@@ -114,6 +114,7 @@ export default function ValentineCard() {
     )
 
     return (
+        <>
         <div style={{
             minHeight: '100vh',
             background: 'linear-gradient(to bottom, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)', // Light red/pink gradient
@@ -176,7 +177,7 @@ export default function ValentineCard() {
 
             {/* Initial Screen Container */}
             <div style={{
-                minHeight: '100vh',
+                height: '100vh',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -184,7 +185,8 @@ export default function ValentineCard() {
                 position: 'relative',
                 perspective: '1000px',
                 padding: '20px',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                overflow: 'hidden',
             }}>
 
                 {/* Corner Decorations */}
@@ -417,6 +419,51 @@ export default function ValentineCard() {
                         </p>
                     </div>
                 </motion.div>
+
+                {/* Scroll indicator — sits in flow just below the card */}
+                {isFlipped && (
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '8px',
+                            marginTop: '32px',
+                            zIndex: 99999,
+                            pointerEvents: 'none',
+                            animation: 'scrollFadeIn 0.8s ease 0.6s both',
+                        }}
+                    >
+                        <style>{`
+                            @keyframes scrollFadeIn {
+                                from { opacity: 0; transform: translateY(20px); }
+                                to { opacity: 1; transform: translateY(0); }
+                            }
+                            @keyframes scrollWheel {
+                                0%, 100% { transform: translateY(0); }
+                                50% { transform: translateY(16px); }
+                            }
+                        `}</style>
+                        <p style={{
+                            fontFamily: "'Dancing Script', cursive",
+                            color: '#d63031',
+                            fontSize: '1.5rem',
+                            margin: 0,
+                            opacity: 0.9,
+                            textShadow: '0 1px 6px rgba(255,255,255,0.8)'
+                        }}>Scroll below</p>
+                        <svg width="32" height="52" viewBox="0 0 32 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="1.5" y="1.5" width="29" height="49" rx="14.5" stroke="#d63031" strokeWidth="2.5" fill="rgba(255,255,255,0.5)" />
+                            <rect
+                                x="14" y="10"
+                                width="4" height="9"
+                                rx="2"
+                                fill="#d63031"
+                                style={{ animation: 'scrollWheel 1.4s ease-in-out infinite' }}
+                            />
+                        </svg>
+                    </div>
+                )}
             </div>
 
             {/* Revealed Sections */}
@@ -442,5 +489,7 @@ export default function ValentineCard() {
                 </motion.div>
             )}
         </div>
+
+        </>
     )
 }
