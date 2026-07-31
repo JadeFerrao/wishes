@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import BirthdayCard from './components/BirthdayCard'
 import ValentineCard from './components/ValentineCard'
+import FriendshipCard from './components/FriendshipCard'
 import { db } from './firebase'
 import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore'
 
 function App() {
-  // Set this to true to show BirthdayCard, false to show ValentineCard
-  const isBirthday = true
+  // Toggle between: 'birthday' | 'valentine' | 'friendship'
+  const cardMode = 'friendship'
 
   const [viewState, setViewState] = useState('loading') // 'loading', 'allowed', 'denied', 'preview'
   const [generatedLink, setGeneratedLink] = useState('')
@@ -81,7 +82,9 @@ function App() {
     <>
       {/* 1. ALLOWED: Show the Card Content */}
       {viewState === 'allowed' && (
-        isBirthday ? <BirthdayCard name="Dada" /> : <ValentineCard />
+        cardMode === 'birthday' ? <BirthdayCard name="Dada" /> :
+        cardMode === 'friendship' ? <FriendshipCard /> :
+        <ValentineCard />
       )}
 
       {/* 2. ADMIN: Show only Link Generator (Secure Mode) */}
@@ -127,7 +130,12 @@ function App() {
                 </div>
               )}
             </>
-          ) : null}
+          ) : (
+            // Show card preview for testing (no admin param)
+            cardMode === 'friendship' ? <FriendshipCard /> :
+              cardMode === 'birthday' ? <BirthdayCard name="Dada" /> :
+              <ValentineCard />
+          )}
         </div>
       )}
     </>
