@@ -130,12 +130,7 @@ function App() {
                 </div>
               )}
             </>
-          ) : (
-            // Show card preview for testing (no admin param)
-            cardMode === 'friendship' ? <FriendshipCard /> :
-              cardMode === 'birthday' ? <BirthdayCard name="Dada" /> :
-              <ValentineCard />
-          )}
+          ) : null}
         </div>
       )}
     </>

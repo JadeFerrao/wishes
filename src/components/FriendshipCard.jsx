@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactConfetti from 'react-confetti'
 import { useWindowSize } from 'react-use'
+import friendshipSong from '../assets/frienship.mp3'
 
 const BEADS = [
   { id: 1, emoji: '😂', quality: 'Humor', color: '#FF6B6B', desc: 'Making every moment hilarious' },
@@ -23,6 +24,7 @@ export default function FriendshipCard() {
   const [showConfetti, setShowConfetti] = useState(false)
   const [braceletGlow, setBraceletGlow] = useState(false)
   const { width, height } = useWindowSize()
+  const audioRef = useRef(new Audio(friendshipSong))
   const isMobile = width < 600
 
   const svgW = isMobile ? 320 : 480
@@ -153,7 +155,13 @@ export default function FriendshipCard() {
                 transition={{ delay: 1 }}
                 whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(255,215,0,0.4)' }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setPhase('building')}
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = 0
+                    audioRef.current.play().catch((e) => console.error('Audio playback failed:', e))
+                  }
+                  setPhase('building')
+                }}
                 style={{
                   padding: isMobile ? '16px 38px' : '18px 50px',
                   fontSize: isMobile ? '1.1rem' : '1.3rem',
