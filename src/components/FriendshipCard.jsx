@@ -394,7 +394,7 @@ export default function FriendshipCard() {
                       margin: '0 0 20px',
                       textAlign: 'center',
                     }}>
-                      Dear Mik,
+                      Dear rosé,
                     </h2>
 
                     <p style={{
@@ -408,8 +408,8 @@ export default function FriendshipCard() {
                       If our friendship were a bracelet, it would be the kind that never breaks — 
                       no matter how much we pull, stretch, or test it. <br /><br />
                       You will definetely be my person that can surely and will turn my worst days into inside jokes
-                      and my best days into core memories. <br /><br />
-                      Thank you for seeing me as a good friend in this past 2 months we really grew into buddies and thank you for being my unpaid therapist, my hype person, who never judges me
+                      and my best days into core memories. I know you have been going through a lot as well, i hope this lightens it more and you will comeback stringer toooo !<br /><br />
+                      Thank you for seeing me as a good friend in this past 2-3 months we really grew into good friends and thank you for being my unpaid therapist, my grammar corrector and who never judges me
                       and the only one who truly gets my weird humor. <br /><br />
                       Here's to us — unbreakable, unmatched, and a little unhinged 🤝
                       <br /><br />
