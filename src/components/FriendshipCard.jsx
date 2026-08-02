@@ -394,7 +394,7 @@ export default function FriendshipCard() {
                       margin: '0 0 20px',
                       textAlign: 'center',
                     }}>
-                      Dear Bebo,
+                      Dear Mik,
                     </h2>
 
                     <p style={{
