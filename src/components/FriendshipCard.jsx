@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactConfetti from 'react-confetti'
 import { useWindowSize } from 'react-use'
+import html2canvas from 'html2canvas'
 import friendshipSong from '../assets/frienship.mp3'
 
 const BEADS = [
@@ -23,9 +24,26 @@ export default function FriendshipCard() {
   const [visibleBeads, setVisibleBeads] = useState(0)
   const [showConfetti, setShowConfetti] = useState(false)
   const [braceletGlow, setBraceletGlow] = useState(false)
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false)
+  
+  // Interactive features state
+  const [highFiveCount, setHighFiveCount] = useState(0)
+  const [hugCount, setHugCount] = useState(0)
+  const [popups, setPopups] = useState([])
+  const [shakeScreen, setShakeScreen] = useState(false)
+  const [hugGlowActive, setHugGlowActive] = useState(false)
+  const [isSigned, setIsSigned] = useState(false)
+  const [downloadingCert, setDownloadingCert] = useState(false)
+
   const { width, height } = useWindowSize()
   const audioRef = useRef(new Audio(friendshipSong))
+  const certRef = useRef(null)
   const isMobile = width < 600
+
+  // Dynamic parameters support
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
+  const recipientName = searchParams.get('name') || 'Mik'
+  const senderName = searchParams.get('from') || 'Jay'
 
   const svgW = isMobile ? 320 : 480
   const svgH = isMobile ? 180 : 240
@@ -58,6 +76,81 @@ export default function FriendshipCard() {
     return () => clearTimeout(id)
   }, [phase, visibleBeads])
 
+  // Sync audio ending state
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    const handleEnded = () => setIsPlayingAudio(false)
+    audio.addEventListener('ended', handleEnded)
+    return () => audio.removeEventListener('ended', handleEnded)
+  }, [])
+
+  const toggleAudio = () => {
+    if (!audioRef.current) return
+    if (isPlayingAudio) {
+      audioRef.current.pause()
+      setIsPlayingAudio(false)
+    } else {
+      audioRef.current.play().then(() => setIsPlayingAudio(true)).catch((e) => console.error('Audio play error:', e))
+    }
+  }
+
+  const triggerHighFive = () => {
+    setHighFiveCount((prev) => prev + 1)
+    setShakeScreen(true)
+    setTimeout(() => setShakeScreen(false), 400)
+
+    const newPopup = {
+      id: Date.now() + Math.random(),
+      type: 'highfive',
+      emoji: ['✋', '💥', '⚡', '💯', '🔥', '👏'][Math.floor(Math.random() * 6)],
+      x: (Math.random() - 0.5) * 160,
+    }
+    setPopups((prev) => [...prev, newPopup])
+    setTimeout(() => {
+      setPopups((prev) => prev.filter((p) => p.id !== newPopup.id))
+    }, 1200)
+  }
+
+  const triggerHug = () => {
+    setHugCount((prev) => prev + 1)
+    setHugGlowActive(true)
+    setTimeout(() => setHugGlowActive(false), 1500)
+
+    const newPopup = {
+      id: Date.now() + Math.random(),
+      type: 'hug',
+      emoji: ['💖', '🤗', '🌸', '💕', '✨', '🫂'][Math.floor(Math.random() * 6)],
+      x: (Math.random() - 0.5) * 160,
+    }
+    setPopups((prev) => [...prev, newPopup])
+    setTimeout(() => {
+      setPopups((prev) => prev.filter((p) => p.id !== newPopup.id))
+    }, 1200)
+  }
+
+  const downloadCertificate = async () => {
+    if (!certRef.current || downloadingCert) return
+    setDownloadingCert(true)
+    try {
+      const canvas = await html2canvas(certRef.current, {
+        scale: 2,
+        backgroundColor: '#0c0c1d',
+        useCORS: true,
+        logging: false,
+      })
+      const dataUrl = canvas.toDataURL('image/png')
+      const link = document.createElement('a')
+      link.download = `${recipientName}_Friendship_Certificate.png`
+      link.href = dataUrl
+      link.click()
+    } catch (err) {
+      console.error('Certificate download error:', err)
+    } finally {
+      setDownloadingCert(false)
+    }
+  }
+
   /* ---------- tiny reusable pieces ---------- */
 
   const Sparkles = () => (
@@ -85,17 +178,34 @@ export default function FriendshipCard() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Satisfy&family=Outfit:wght@300;400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Satisfy&family=Outfit:wght@300;400;600;700;800&family=Cinzel:wght@600;700;800&display=swap');
         @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
         @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+        @keyframes vinylSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
         .shimmer-text{
           background:linear-gradient(90deg,#FFD700,#FFF,#FFD700,#FFF,#FFD700);
           background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
           animation:shimmer 3s linear infinite;
         }
         .float-anim{animation:floatY 2.5s ease-in-out infinite}
+        .vinyl-spinning{animation:vinylSpin 4s linear infinite}
         @keyframes marqueeScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
       `}</style>
+
+      {/* Hug warmth screen overlay */}
+      <AnimatePresence>
+        {hugGlowActive && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 999, pointerEvents: 'none',
+              background: 'radial-gradient(circle at center, rgba(255, 105, 180, 0.25) 0%, rgba(255, 182, 193, 0.1) 60%, transparent 100%)',
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* confetti */}
       {showConfetti && (
@@ -113,6 +223,8 @@ export default function FriendshipCard() {
         position: 'relative',
         overflowX: 'hidden',
         overflowY: phase === 'complete' ? 'auto' : 'hidden',
+        transform: shakeScreen ? 'translate(4px, -4px)' : 'none',
+        transition: 'transform 0.05s ease-in-out',
       }}>
         <Sparkles />
 
@@ -158,7 +270,9 @@ export default function FriendshipCard() {
                 onClick={() => {
                   if (audioRef.current) {
                     audioRef.current.currentTime = 0
-                    audioRef.current.play().catch((e) => console.error('Audio playback failed:', e))
+                    audioRef.current.play()
+                      .then(() => setIsPlayingAudio(true))
+                      .catch((e) => console.error('Audio playback failed:', e))
                   }
                   setPhase('building')
                 }}
@@ -291,26 +405,197 @@ export default function FriendshipCard() {
                   className="float-anim"
                   style={{ marginTop: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}
                 >
-                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.5)', fontSize: '0.95rem' }}>Scroll down for your message</p>
+                  <p style={{ margin: 0, color: 'rgba(255,255,255,0.5)', fontSize: '0.95rem' }}>Scroll down to experience your story</p>
                   <span style={{ fontSize: '1.5rem' }}>👇</span>
                 </motion.div>
               )}
             </div>
 
-            {/* ====== BEAD QUALITY CARDS ====== */}
+            {/* ====== STORY JOURNEY (ALL SCROLLABLE SECTIONS) ====== */}
             {phase === 'complete' && (
               <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+                style={{ position: 'relative', zIndex: 20 }}
               >
-                {/* quality cards section */}
-                <div style={{ padding: isMobile ? '40px 16px' : '60px 40px', maxWidth: 900, margin: '0 auto' }}>
-                  <motion.h2
-                    initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }}
-                    viewport={{ once: true }}
-                    style={{ color: '#FFD700', fontSize: isMobile ? '1.5rem' : '2.2rem', fontWeight: 700, textAlign: 'center', marginBottom: 40 }}
+                {/* ---------------------------------------------------- */}
+                {/* STORY CHAPTER 1: RETRO VINYL MUSIC PLAYER            */}
+                {/* ---------------------------------------------------- */}
+                <div style={{ padding: isMobile ? '40px 16px' : '60px 40px', maxWidth: 700, margin: '0 auto' }}>
+                  <motion.div
+                    initial={{ y: 50, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    viewport={{ once: true, margin: '-50px' }}
+                    transition={{ duration: 0.8 }}
+                    style={{
+                      background: 'linear-gradient(145deg, rgba(30, 25, 55, 0.7), rgba(15, 12, 35, 0.8))',
+                      backdropFilter: 'blur(16px)',
+                      borderRadius: 28,
+                      padding: isMobile ? '24px 20px' : '36px 40px',
+                      border: '1px solid rgba(255, 215, 0, 0.25)',
+                      boxShadow: '0 16px 40px rgba(0,0,0,0.4)',
+                    }}
                   >
-                    Every Bead Tells a Story
-                  </motion.h2>
+                    <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                      <span style={{
+                        background: 'rgba(255,215,0,0.15)', color: '#FFD700',
+                        fontSize: '0.8rem', fontWeight: 700, letterSpacing: 1.5,
+                        padding: '4px 14px', borderRadius: 20, textTransform: 'uppercase'
+                      }}>
+                        Chapter 1 • The Soundtrack
+                      </span>
+                      <h3 style={{ color: '#FFF', fontSize: isMobile ? '1.4rem' : '1.8rem', margin: '10px 0 4px', fontWeight: 700 }}>
+                        The Friendship Anthem 🎧
+                      </h3>
+                      <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', margin: 0 }}>
+                        Every iconic bond deserves a signature soundtrack spin
+                      </p>
+                    </div>
+
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: isMobile ? 'column' : 'row',
+                      alignItems: 'center',
+                      justify: 'center',
+                      gap: isMobile ? 24 : 36,
+                      marginTop: 10,
+                    }}>
+                      {/* Vinyl Turntable Graphic */}
+                      <div style={{ position: 'relative', width: 170, height: 170, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {/* Vinyl Disc */}
+                        <div
+                          className={isPlayingAudio ? 'vinyl-spinning' : ''}
+                          style={{
+                            width: 160, height: 160, borderRadius: '50%',
+                            background: 'radial-gradient(circle, #2a2a2a 0%, #111 40%, #222 55%, #050505 100%)',
+                            boxShadow: isPlayingAudio ? '0 0 25px rgba(255,215,0,0.35)' : '0 8px 20px rgba(0,0,0,0.6)',
+                            position: 'relative',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            border: '3px solid #333',
+                          }}
+                        >
+                          {/* vinyl groove rings */}
+                          <div style={{
+                            position: 'absolute', inset: 12, borderRadius: '50%',
+                            border: '1px dashed rgba(255,255,255,0.08)',
+                          }} />
+                          <div style={{
+                            position: 'absolute', inset: 28, borderRadius: '50%',
+                            border: '1px solid rgba(255,255,255,0.05)',
+                          }} />
+
+                          {/* Center sticker */}
+                          <div style={{
+                            width: 58, height: 58, borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #FF6B6B, #FFD700)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: 'inset 0 0 8px rgba(0,0,0,0.5)',
+                            position: 'relative',
+                          }}>
+                            <span style={{ fontSize: '1.4rem' }}>📿</span>
+                            {/* center spindle hole */}
+                            <div style={{
+                              position: 'absolute', width: 10, height: 10, borderRadius: '50%',
+                              background: '#0c0c1d', border: '1px solid rgba(255,255,255,0.4)',
+                            }} />
+                          </div>
+                        </div>
+
+                        {/* Vinyl Tonearm Needle */}
+                        <motion.div
+                          animate={{ rotate: isPlayingAudio ? 22 : 0 }}
+                          transition={{ duration: 0.5 }}
+                          style={{
+                            position: 'absolute', top: 5, right: 10,
+                            width: 70, height: 8, originX: 0.9, originY: 0.2,
+                            pointerEvents: 'none', zIndex: 5,
+                          }}
+                        >
+                          <div style={{
+                            width: 60, height: 4, background: '#FFD700', borderRadius: 2,
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.5)', position: 'relative',
+                          }}>
+                            <div style={{
+                              position: 'absolute', left: 0, top: -2, width: 8, height: 8,
+                              background: '#FFF', borderRadius: '50%',
+                            }} />
+                          </div>
+                        </motion.div>
+                      </div>
+
+                      {/* Controls & Track Details */}
+                      <div style={{
+                        display: 'flex', flexDirection: 'column',
+                        alignItems: isMobile ? 'center' : 'flex-start',
+                        gap: 12, flex: 1,
+                      }}>
+                        <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
+                          <h4 style={{ margin: 0, color: '#FFD700', fontSize: '1.1rem', fontWeight: 700 }}>
+                            Unbreakable Bond FM
+                          </h4>
+                          <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem' }}>
+                            Dedicated to {recipientName} • Mixed by {senderName}
+                          </p>
+                        </div>
+
+                        {/* Animated Visualizer Soundbars */}
+                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 30, padding: '4px 0' }}>
+                          {[18, 30, 14, 26, 36, 16, 28, 20].map((baseH, idx) => (
+                            <motion.div
+                              key={idx}
+                              animate={{
+                                height: isPlayingAudio ? [8, baseH, 10, baseH + 4, 6] : 6,
+                              }}
+                              transition={{
+                                duration: 0.6 + idx * 0.1,
+                                repeat: Infinity,
+                                repeatType: 'reverse',
+                              }}
+                              style={{
+                                width: 5, borderRadius: 3,
+                                background: `hsl(${idx * 40 + 40}, 100%, 65%)`,
+                              }}
+                            />
+                          ))}
+                        </div>
+
+                        {/* Play/Pause Button */}
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={toggleAudio}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 10,
+                            padding: '12px 24px', borderRadius: 30, border: 'none',
+                            background: isPlayingAudio
+                              ? 'linear-gradient(135deg, #FF4757, #FF6B6B)'
+                              : 'linear-gradient(135deg, #FFD700, #FFA500)',
+                            color: '#1a1a2e', fontWeight: 800, fontSize: '0.95rem',
+                            cursor: 'pointer', boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
+                          }}
+                        >
+                          <span>{isPlayingAudio ? '⏸️ Pause Track' : '▶️ Play Vinyl Track'}</span>
+                        </motion.button>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* ---------------------------------------------------- */}
+                {/* STORY CHAPTER 2: BEAD QUALITY CARDS                   */}
+                {/* ---------------------------------------------------- */}
+                <div style={{ padding: isMobile ? '30px 16px' : '50px 40px', maxWidth: 900, margin: '0 auto' }}>
+                  <div style={{ textAlign: 'center', marginBottom: 30 }}>
+                    <span style={{
+                      background: 'rgba(255,215,0,0.15)', color: '#FFD700',
+                      fontSize: '0.8rem', fontWeight: 700, letterSpacing: 1.5,
+                      padding: '4px 14px', borderRadius: 20, textTransform: 'uppercase'
+                    }}>
+                      Chapter 2 • The Elements
+                    </span>
+                    <h2 style={{ color: '#FFD700', fontSize: isMobile ? '1.5rem' : '2.2rem', fontWeight: 700, marginTop: 8 }}>
+                      Every Bead Tells a Story
+                    </h2>
+                  </div>
 
                   <div style={{
                     display: 'grid',
@@ -360,8 +645,18 @@ export default function FriendshipCard() {
                   </div>
                 </div>
 
-                {/* ====== LETTER ====== */}
-                <div style={{ padding: isMobile ? '40px 16px 20px' : '60px 40px 20px', display: 'flex', justifyContent: 'center' }}>
+                {/* ---------------------------------------------------- */}
+                {/* STORY CHAPTER 3: HANDWRITTEN LETTER                  */}
+                {/* ---------------------------------------------------- */}
+                <div style={{ padding: isMobile ? '40px 16px' : '60px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{
+                    background: 'rgba(255,215,0,0.15)', color: '#FFD700',
+                    fontSize: '0.8rem', fontWeight: 700, letterSpacing: 1.5,
+                    padding: '4px 14px', borderRadius: 20, textTransform: 'uppercase', marginBottom: 16
+                  }}>
+                    Chapter 3 • A Personal Note
+                  </span>
+
                   <motion.div
                     initial={{ y: 60, opacity: 0, rotateX: 15 }}
                     whileInView={{ y: 0, opacity: 1, rotateX: 0 }}
@@ -394,7 +689,7 @@ export default function FriendshipCard() {
                       margin: '0 0 20px',
                       textAlign: 'center',
                     }}>
-                      Dear Mik,
+                      Dear {recipientName},
                     </h2>
 
                     <p style={{
@@ -405,26 +700,140 @@ export default function FriendshipCard() {
                       lineHeight: 1.8,
                       margin: 0,
                     }}>
-                      If our friendship were a bracelet, it would be the kind that never breaks — 
+                      If our friendship were a bracelet, it would be the kind that never breaks —
                       no matter how much we pull, stretch, or test it. <br /><br />
                       You will definetely be my person that can surely and will turn my worst days into inside jokes
-                      and my best days into core memories. I know you have been going through a lot as well, i hope this lightens it more and you will comeback stringer toooo !<br /><br />
+                      and my best days into core memories. I know you have been going through a lot as well, i hope this lightens it more and you will comeback stronger toooo !<br /><br />
                       Thank you for seeing me as a good friend in this past 2 months we really grew into good friends and thank you for being my unpaid therapist, moi crazy ambulance too and who never judges me
                       and the only one who truly gets my weird humor. <br /><br />
                       Here's to us — unbreakable, unmatched, and a little unhinged 🤝
                       <br /><br />
                       <span style={{ fontSize: isMobile ? '1.6rem' : '2rem', color: '#FFD700' }}>
-                        — Your Forever Buddyyy , jay!
+                        — Your Forever Buddyyy , {senderName}!
                       </span>
                     </p>
                   </motion.div>
                 </div>
 
-                {/* ====== MARQUEE ====== */}
+                {/* ---------------------------------------------------- */}
+                {/* STORY CHAPTER 4: VIRTUAL HIGH-FIVE & HUG SQUEEZE     */}
+                {/* ---------------------------------------------------- */}
+                <div style={{ padding: isMobile ? '40px 16px' : '60px 40px', maxWidth: 800, margin: '0 auto' }}>
+                  <div style={{ textAlign: 'center', marginBottom: 28 }}>
+                    <span style={{
+                      background: 'rgba(255,215,0,0.15)', color: '#FFD700',
+                      fontSize: '0.8rem', fontWeight: 700, letterSpacing: 1.5,
+                      padding: '4px 14px', borderRadius: 20, textTransform: 'uppercase'
+                    }}>
+                      Chapter 4 • Instant Vibe Boost
+                    </span>
+                    <h2 style={{ color: '#FFD700', fontSize: isMobile ? '1.5rem' : '2.2rem', fontWeight: 700, marginTop: 8 }}>
+                      Send Some Love Right Now ⚡
+                    </h2>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.95rem' }}>
+                      Tap the buttons below to trigger live interactive boosts!
+                    </p>
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+                    gap: 20,
+                    position: 'relative',
+                  }}>
+                    {/* Floating particle animations overlay */}
+                    {popups.map((p) => (
+                      <motion.div
+                        key={p.id}
+                        initial={{ opacity: 1, y: 0, scale: 0.5, x: p.x }}
+                        animate={{ opacity: 0, y: -140, scale: 1.8 }}
+                        transition={{ duration: 1.2, ease: 'easeOut' }}
+                        style={{
+                          position: 'absolute', top: '30%', left: '50%',
+                          fontSize: '2.5rem', pointerEvents: 'none', zIndex: 100,
+                        }}
+                      >
+                        {p.emoji}
+                      </motion.div>
+                    ))}
+
+                    {/* High Five Card */}
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255, 71, 87, 0.15), rgba(255, 107, 107, 0.05))',
+                        border: '1px solid rgba(255, 71, 87, 0.4)',
+                        borderRadius: 24, padding: '28px 24px',
+                        textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                      }}
+                    >
+                      <div style={{ fontSize: '3rem' }}>🖐️</div>
+                      <h3 style={{ margin: 0, color: '#FF4757', fontSize: '1.3rem', fontWeight: 700 }}>
+                        Virtual High-Five!
+                      </h3>
+                      <p style={{ margin: 0, color: 'rgba(255,255,255,0.6)', fontSize: '0.88rem' }}>
+                        Smash the button for a high-energy snap!
+                      </p>
+                      <motion.button
+                        whileHover={{ scale: 1.06 }}
+                        whileTap={{ scale: 0.92 }}
+                        onClick={triggerHighFive}
+                        style={{
+                          padding: '14px 28px', borderRadius: 30, border: 'none',
+                          background: 'linear-gradient(135deg, #FF4757, #FF6B6B)',
+                          color: '#FFF', fontWeight: 800, fontSize: '1rem',
+                          cursor: 'pointer', boxShadow: '0 6px 20px rgba(255, 71, 87, 0.4)',
+                          marginTop: 6,
+                        }}
+                      >
+                        ✋ High-Five ({highFiveCount})
+                      </motion.button>
+                    </motion.div>
+
+                    {/* Hug Squeeze Card */}
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255, 105, 180, 0.15), rgba(168, 230, 207, 0.05))',
+                        border: '1px solid rgba(255, 105, 180, 0.4)',
+                        borderRadius: 24, padding: '28px 24px',
+                        textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                      }}
+                    >
+                      <div style={{ fontSize: '3rem' }}>🤗</div>
+                      <h3 style={{ margin: 0, color: '#FF69B4', fontSize: '1.3rem', fontWeight: 700 }}>
+                        Squeeze Hug Station
+                      </h3>
+                      <p style={{ margin: 0, color: 'rgba(255,255,255,0.6)', fontSize: '0.88rem' }}>
+                        Send warm glowing vibes & instant comfort!
+                      </p>
+                      <motion.button
+                        whileHover={{ scale: 1.06 }}
+                        whileTap={{ scale: 0.92 }}
+                        onClick={triggerHug}
+                        style={{
+                          padding: '14px 28px', borderRadius: 30, border: 'none',
+                          background: 'linear-gradient(135deg, #FF69B4, #FFA07A)',
+                          color: '#FFF', fontWeight: 800, fontSize: '1rem',
+                          cursor: 'pointer', boxShadow: '0 6px 20px rgba(255, 105, 180, 0.4)',
+                          marginTop: 6,
+                        }}
+                      >
+                        🫂 Warm Hug ({hugCount})
+                      </motion.button>
+                    </motion.div>
+                  </div>
+                </div>
+
+                {/* ---------------------------------------------------- */}
+                {/* STORY CHAPTER 5: MARQUEE & STATS                     */}
+                {/* ---------------------------------------------------- */}
                 <div style={{
                   overflow: 'hidden',
                   padding: '30px 0',
-                  marginTop: 40,
+                  marginTop: 20,
                   borderTop: '1px solid rgba(255,215,0,0.1)',
                   borderBottom: '1px solid rgba(255,215,0,0.1)',
                 }}>
@@ -441,17 +850,17 @@ export default function FriendshipCard() {
                         letterSpacing: 2,
                         paddingRight: 60,
                       }}>
-                        Friends who slay together stay together ✦ Real ones don't need a reason to show up ✦ 
-                        You're stuck with me forever ✦ Cheers to the chaos we call friendship ✦ 
+                        Friends who slay together stay together ✦ Real ones don't need a reason to show up ✦
+                        You're stuck with me forever ✦ Cheers to the chaos we call friendship ✦
                         My favorite notification is you ✦ We're basically a two-person cult ✦{' '}
                       </span>
                     ))}
                   </div>
                 </div>
 
-                {/* ====== FRIENDSHIP FACTS TICKER ====== */}
+                {/* Friendship Stats */}
                 <div style={{
-                  padding: isMobile ? '50px 16px' : '70px 40px',
+                  padding: isMobile ? '40px 16px' : '50px 40px',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20,
                 }}>
                   <motion.h2
@@ -463,7 +872,7 @@ export default function FriendshipCard() {
 
                   <div style={{
                     display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: isMobile ? 16 : 28,
-                    marginTop: 16,
+                    marginTop: 12,
                   }}>
                     {[
                       { num: '∞', label: 'Inside Jokes' },
@@ -495,6 +904,203 @@ export default function FriendshipCard() {
                   </div>
                 </div>
 
+                {/* ---------------------------------------------------- */}
+                {/* STORY CHAPTER 6: GRAND FINALE CERTIFICATE             */}
+                {/* ---------------------------------------------------- */}
+                <div style={{ padding: isMobile ? '50px 16px 80px' : '70px 40px 100px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ textAlign: 'center', marginBottom: 30 }}>
+                    <span style={{
+                      background: 'rgba(255,215,0,0.15)', color: '#FFD700',
+                      fontSize: '0.8rem', fontWeight: 700, letterSpacing: 1.5,
+                      padding: '4px 14px', borderRadius: 20, textTransform: 'uppercase'
+                    }}>
+                      Chapter 5 • The Grand Finale
+                    </span>
+                    <h2 style={{ color: '#FFD700', fontSize: isMobile ? '1.8rem' : '2.5rem', fontWeight: 800, marginTop: 8 }}>
+                      Official Certificate of Friendship 📜
+                    </h2>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.95rem', margin: 0 }}>
+                      Sealed permanently under the laws of lifelong best friends
+                    </p>
+                  </div>
+
+                  {/* Certificate Canvas Node */}
+                  <motion.div
+                    ref={certRef}
+                    initial={{ y: 50, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                    style={{
+                      background: 'linear-gradient(135deg, #151328 0%, #0d0b1a 100%)',
+                      border: '3px solid #FFD700',
+                      borderRadius: 24,
+                      padding: isMobile ? '32px 20px' : '50px 44px',
+                      maxWidth: 680,
+                      width: '100%',
+                      boxShadow: '0 25px 60px rgba(0,0,0,0.6), inset 0 0 20px rgba(255,215,0,0.15)',
+                      position: 'relative',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    {/* Inner ornamental border */}
+                    <div style={{
+                      border: '1px dashed rgba(255,215,0,0.4)',
+                      borderRadius: 16,
+                      padding: isMobile ? '20px 14px' : '30px 24px',
+                      textAlign: 'center',
+                      position: 'relative',
+                    }}>
+                      {/* Corner Accents */}
+                      {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map((corner, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            position: 'absolute',
+                            top: corner.includes('top') ? 6 : 'auto',
+                            bottom: corner.includes('bottom') ? 6 : 'auto',
+                            left: corner.includes('left') ? 6 : 'auto',
+                            right: corner.includes('right') ? 6 : 'auto',
+                            color: '#FFD700', fontSize: '1.2rem', opacity: 0.7,
+                          }}
+                        >
+                          ✦
+                        </div>
+                      ))}
+
+                      {/* Header Badge */}
+                      <div style={{ fontSize: '2.5rem', marginBottom: 8 }}>🏆</div>
+                      <h2 style={{
+                        fontFamily: "'Cinzel', serif",
+                        color: '#FFD700',
+                        fontSize: isMobile ? '1.4rem' : '2.1rem',
+                        letterSpacing: 2,
+                        margin: '0 0 6px',
+                        textTransform: 'uppercase',
+                        fontWeight: 700,
+                      }}>
+                        Certificate of Friendship
+                      </h2>
+
+                      <p style={{
+                        color: 'rgba(255,255,255,0.5)',
+                        fontSize: '0.8rem',
+                        letterSpacing: 1.5,
+                        textTransform: 'uppercase',
+                        margin: '0 0 24px',
+                      }}>
+                        Official Unbreakable Bond Registry • ID #BFF-2026-999
+                      </p>
+
+                      <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: isMobile ? '0.95rem' : '1.1rem', margin: '0 0 8px' }}>
+                        This certifies that
+                      </p>
+
+                      <h3 style={{
+                        fontFamily: "'Satisfy', cursive",
+                        color: '#FF6B6B',
+                        fontSize: isMobile ? '2.2rem' : '3rem',
+                        margin: '0 0 12px',
+                        textShadow: '0 2px 10px rgba(255,107,107,0.3)',
+                      }}>
+                        {recipientName}
+                      </h3>
+
+                      <p style={{
+                        color: 'rgba(255,255,255,0.8)',
+                        fontSize: isMobile ? '0.9rem' : '1.05rem',
+                        lineHeight: 1.7,
+                        maxWidth: 500,
+                        margin: '0 auto 28px',
+                      }}>
+                        is officially designated as the Best Friend For Life of <strong>{senderName}</strong>.
+                        Granted full privileges of unhinged laughter, midnight emergency calls, shared brain cells, and eternal loyalty without expiration.
+                      </p>
+
+                      {/* Signature Lines Block */}
+                      <div style={{
+                        display: 'flex',
+                        justify: 'space-around',
+                        alignItems: 'flex-end',
+                        marginTop: 20,
+                        paddingTop: 16,
+                        borderTop: '1px solid rgba(255,215,0,0.2)',
+                        gap: 16,
+                      }}>
+                        {/* Sender signature */}
+                        <div style={{ textAlign: 'center' }}>
+                          <p style={{
+                            fontFamily: "'Satisfy', cursive",
+                            color: '#FFD700', fontSize: isMobile ? '1.2rem' : '1.6rem',
+                            margin: '0 0 2px',
+                          }}>
+                            {senderName} ✍️
+                          </p>
+                          <div style={{ width: 120, height: 1, background: 'rgba(255,215,0,0.5)', margin: '0 auto 4px' }} />
+                          <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase' }}>Issued By</span>
+                        </div>
+
+                        {/* Recipient signature / interactive sign */}
+                        <div style={{ textAlign: 'center' }}>
+                          {isSigned ? (
+                            <motion.p
+                              initial={{ scale: 0.5, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              style={{
+                                fontFamily: "'Satisfy', cursive",
+                                color: '#A8E6CF', fontSize: isMobile ? '1.2rem' : '1.6rem',
+                                margin: '0 0 2px',
+                              }}
+                            >
+                              {recipientName} ✨
+                            </motion.p>
+                          ) : (
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => {
+                                setIsSigned(true)
+                                setShowConfetti(true)
+                                setTimeout(() => setShowConfetti(false), 5000)
+                              }}
+                              style={{
+                                background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+                                border: 'none', borderRadius: 16, padding: '6px 14px',
+                                color: '#1a1a2e', fontWeight: 800, fontSize: '0.8rem',
+                                cursor: 'pointer', marginBottom: 4,
+                              }}
+                            >
+                              Sign Here ✍️
+                            </motion.button>
+                          )}
+                          <div style={{ width: 120, height: 1, background: 'rgba(255,215,0,0.5)', margin: '0 auto 4px' }} />
+                          <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase' }}>
+                            {isSigned ? 'Signed & Sealed' : 'Tap to Sign'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Certificate Action Buttons */}
+                  <div style={{ display: 'flex', gap: 16, marginTop: 24, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={downloadCertificate}
+                      style={{
+                        padding: '14px 28px', borderRadius: 30, border: 'none',
+                        background: 'linear-gradient(135deg, #FFD700, #FFA500, #FF6B6B)',
+                        color: '#1a1a2e', fontWeight: 800, fontSize: '1rem',
+                        cursor: 'pointer', boxShadow: '0 8px 25px rgba(255,215,0,0.3)',
+                        display: 'flex', alignItems: 'center', gap: 8,
+                      }}
+                    >
+                      <span>{downloadingCert ? '⏳ Generating PNG...' : '📜 Save Certificate PNG'}</span>
+                    </motion.button>
+                  </div>
+                </div>
+
                 {/* footer */}
                 <div style={{
                   textAlign: 'center', padding: '30px 20px 50px',
@@ -510,3 +1116,4 @@ export default function FriendshipCard() {
     </>
   )
 }
+
