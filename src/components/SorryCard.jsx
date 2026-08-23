@@ -462,7 +462,7 @@ const SorryCard = () => {
                     margin: '0 0 6px 0',
                     fontFamily: "'Caveat', cursive"
                   }}>
-                    {response === 'forgiven' ? 'You are the best friend ever! 🎉🤝' : 'Sending big hugs & starbucks treat soon! 🧋💖'}
+                    {response === 'forgiven' ? 'You are the best friend ever! 🎉🤝' : 'Sending big hugs & starbucks treat soon on a condition we meet haa! 🧋💖'}
                   </p>
                   <p style={{
                     fontSize: '1.15rem',
@@ -471,7 +471,7 @@ const SorryCard = () => {
                     fontFamily: "'Caveat', cursive"
                   }}>
                     {response === 'forgiven'
-                      ? 'Thank you for being so understanding! Food/starbucks on me next time!'
+                      ? 'Thank you for being so understanding! Food/starbucks on me soon!'
                       : 'Infinite warm hugs coming your way right now! Besties forever!'}
                   </p>
                 </motion.div>
