@@ -386,7 +386,8 @@ const SorryCard = () => {
                 </p>
 
                 <p style={{ margin: '0 0 16px 0' }}>
-                  You are one special and genuine friend i happened to make yaar bebo. Our crazy gossips, and bond mean so much to me, and I hate thinking that I hurt you in any way, kabhi aaya nahi ki it would take a turn like this.
+                  You are one special and genuine friend i happened to make yaar bebo. Our crazy gossips/ europe trips/grieving over hot girls or guys lmao, this bond means a lot yaar pagal, and I hate that it hurt you in this way, kabhi aaya nahi ki it would take a turn like this. 
+                  i really hope this doesnt ruin our frienship aise yaar. I hope im actually forgiven even if its a small misunderstanding between us haan.
                 </p>
 
                 <p style={{ margin: '0 0 22px 0', color: '#800f2f', fontWeight: 'bold' }}>
