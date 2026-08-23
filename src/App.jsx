@@ -3,12 +3,13 @@ import './App.css'
 import BirthdayCard from './components/BirthdayCard'
 import ValentineCard from './components/ValentineCard'
 import FriendshipCard from './components/FriendshipCard'
+import SorryCard from './components/SorryCard'
 import { db } from './firebase'
 import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore'
 
 function App() {
-  // Toggle between: 'birthday' | 'valentine' | 'friendship'
-  const cardMode = 'friendship'
+  // Toggle between: 'birthday' | 'valentine' | 'friendship' | 'sorry'
+  const cardMode = 'sorry'
 
   const [viewState, setViewState] = useState('loading') // 'loading', 'allowed', 'denied', 'preview'
   const [generatedLink, setGeneratedLink] = useState('')
@@ -84,6 +85,7 @@ function App() {
       {viewState === 'allowed' && (
         cardMode === 'birthday' ? <BirthdayCard name="Dada" /> :
         cardMode === 'friendship' ? <FriendshipCard /> :
+        cardMode === 'sorry' ? <SorryCard /> :
         <ValentineCard />
       )}
 
