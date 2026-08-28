@@ -7,7 +7,7 @@ import Decorations from './Decorations';
 import Balloons from './Balloons';
 import birthdaySong from '../assets/Congratulations_And_Celebrations.mp3';
 
-const BirthdayCard = ({ name = "User" }) => {
+const BirthdayCard = ({ name = "Dada" }) => {
     const [lightsOn, setLightsOn] = useState(false);
     const [musicPlaying, setMusicPlaying] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
