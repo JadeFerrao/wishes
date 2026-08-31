@@ -5,6 +5,7 @@ import { useWindowSize } from 'react-use';
 import Cake from './Cake';
 import Decorations from './Decorations';
 import Balloons from './Balloons';
+import LuxuryScratchCard from './LuxuryScratchCard';
 import birthdaySong from '../assets/Congratulations_And_Celebrations.mp3';
 
 const BirthdayCard = ({ name = "Dada" }) => {
@@ -61,10 +62,12 @@ const BirthdayCard = ({ name = "Dada" }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'flex-start',
             position: 'relative',
-            overflow: 'hidden',
-            color: lightsOn ? '#333' : '#f0f0f0'
+            overflowX: 'hidden',
+            overflowY: 'auto',
+            color: lightsOn ? '#333' : '#f0f0f0',
+            paddingBottom: '60px'
         }}>
 
             {/* Content visible ONLY when Lights are ON */}
@@ -77,7 +80,7 @@ const BirthdayCard = ({ name = "Dada" }) => {
                     <motion.div
                         initial={{ y: -50, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        style={{ position: 'absolute', top: 50, fontSize: '2rem', fontWeight: 'bold', zIndex: 10 }}
+                        style={{ marginTop: '40px', fontSize: '2rem', fontWeight: 'bold', zIndex: 10 }}
                     >
                         Happy Birthday, {name}!
                     </motion.div>
@@ -110,7 +113,7 @@ const BirthdayCard = ({ name = "Dada" }) => {
                     )}
 
                     {/* Swinging Happy Birthday Text */}
-                    <div style={{ perspective: 1000, marginBottom: '1rem', marginTop: '2rem' }}>
+                    <div style={{ perspective: 1000, marginBottom: '1rem', marginTop: '1rem' }}>
                         <motion.h1
                             animate={{ rotateX: [10, -10] }}
                             transition={swingTransition}
@@ -130,7 +133,7 @@ const BirthdayCard = ({ name = "Dada" }) => {
                     {/* Custom Cake Component */}
                     <Cake candlesOn={candlesOn} onBlow={blowCandles} />
 
-                    {/* Floating "Blow Candles" Button (Separate from lights check, but nested here effectively) */}
+                    {/* Floating "Blow Candles" Button */}
                     {candlesOn && (
                         <motion.button
                             animate={{ y: [0, -10, 0] }}
@@ -155,9 +158,8 @@ const BirthdayCard = ({ name = "Dada" }) => {
                 </>
             )}
 
-
-            {/* Controls - Always visible (or at least the Light Switch is) */}
-            <div style={{ display: 'flex', gap: '20px', marginTop: '20px', zIndex: 30 }}>
+            {/* Controls - Always visible */}
+            <div style={{ display: 'flex', gap: '20px', marginTop: lightsOn ? '20px' : '40vh', zIndex: 30, marginBottom: '30px' }}>
                 <button
                     onClick={() => {
                         const newState = !lightsOn;
@@ -180,11 +182,11 @@ const BirthdayCard = ({ name = "Dada" }) => {
                     className="control-btn"
                     style={{
                         padding: '15px 30px',
-                        fontSize: '1.5rem', // Larger button
+                        fontSize: '1.5rem',
                         cursor: 'pointer',
-                        borderRadius: '50px', // Rounder
+                        borderRadius: '50px',
                         border: 'none',
-                        background: lightsOn ? '#ffeaa7' : '#FFFFFF', // White when off for contrast
+                        background: lightsOn ? '#ffeaa7' : '#FFFFFF',
                         color: lightsOn ? '#333' : '#000',
                         boxShadow: '0 4px 15px rgba(255, 255, 255, 0.3)',
                         fontWeight: 'bold'
@@ -204,6 +206,13 @@ const BirthdayCard = ({ name = "Dada" }) => {
                 )}
             </div>
 
+            {/* Luxury Scratch Card Section placed below main Birthday Card */}
+            {lightsOn && (
+                <div style={{ width: '100%', marginTop: '30px', zIndex: 10 }}>
+                    <LuxuryScratchCard name={name} />
+                </div>
+            )}
+
             <audio ref={audioRef} loop onError={(e) => console.error("Audio failed to load", e)}>
                 <source src={birthdaySong} type="audio/mpeg" />
             </audio>
@@ -212,7 +221,6 @@ const BirthdayCard = ({ name = "Dada" }) => {
                 <div style={{
                     position: 'absolute',
                     top: 0, left: 0, right: 0, bottom: 0,
-                    // Slightly simpler gradient to not hide the centered button too much if it was behind
                     background: 'radial-gradient(circle at center, #2d3436 0%, #000000 100%)',
                     pointerEvents: 'none',
                     zIndex: 0
