@@ -6,6 +6,7 @@ import planeImg from '../assets/plane.png';
 import indigoLogo from '../assets/indigologo.png';
 import indigoTune from '../assets/indigo-tune.mp3';
 import picShot from '../assets/picshot.png';
+import html2canvas from 'html2canvas';
 
 /* ─────────────────────────────────────────
    Cloud SVG helper
@@ -80,104 +81,198 @@ const RunwayLights = () => (
 /* ─────────────────────────────────────────
    Boarding Pass
 ───────────────────────────────────────── */
-const BoardingPass = ({ name, visible }) => (
-  <AnimatePresence>
-    {visible && (
-      <motion.div
-        initial={{ scaleY: 0, opacity: 0, rotateX: -90 }}
-        animate={{ scaleY: 1, opacity: 1, rotateX: 0 }}
-        exit={{ scaleY: 0, opacity: 0 }}
-        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
-        style={{
-          perspective: 1200,
-          transformOrigin: 'top center',
-          width: 'min(520px, 92vw)',
-          margin: '0 auto',
-          zIndex: 30,
-        }}
-      >
-        <div style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%)',
-          borderRadius: 20,
-          boxShadow: '0 30px 80px rgba(0,60,120,0.4), 0 0 0 1px rgba(255,255,255,0.3)',
-          overflow: 'hidden',
-          fontFamily: "'Outfit', sans-serif",
-          position: 'relative',
-        }}>
-          <div style={{
-            background: 'linear-gradient(90deg, #1a3a8f 0%, #0066cc 50%, #1a3a8f 100%)',
-            padding: '14px 24px',
+const BoardingPass = ({ name, visible }) => {
+  const passRef = useRef(null);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
+
+  const handleDownload = async () => {
+    if (!passRef.current || downloading) return;
+    setDownloading(true);
+    try {
+      const canvas = await html2canvas(passRef.current, {
+        scale: 3, // crisp high resolution
+        useCORS: true,
+        logging: false,
+        backgroundColor: null,
+      });
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      const cleanName = (name || 'Passenger').replace(/\s+/g, '_');
+      link.download = `${cleanName}_IndiGo_BoardingPass.png`;
+      link.href = dataUrl;
+      link.click();
+      setDownloadSuccess(true);
+      setTimeout(() => setDownloadSuccess(false), 3000);
+    } catch (err) {
+      console.error('Failed to download boarding pass:', err);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ scaleY: 0, opacity: 0, rotateX: -90 }}
+          animate={{ scaleY: 1, opacity: 1, rotateX: 0 }}
+          exit={{ scaleY: 0, opacity: 0 }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+          style={{
+            perspective: 1200,
+            transformOrigin: 'top center',
+            width: 'min(520px, 92vw)',
+            margin: '0 auto',
+            zIndex: 30,
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'space-between',
-          }}>
-            <img src={indigoLogo} alt="IndiGo" style={{ height: 66, objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
-            <div style={{ color: '#ffe97a', fontWeight: 700, fontSize: '0.85rem', letterSpacing: 3 }}>BOARDING PASS</div>
-          </div>
-
-          <div style={{ padding: '20px 24px', display: 'flex', gap: 20, alignItems: 'center' }}>
-            <div style={{ flex: 1, textAlign: 'center' }}>
-              <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#1a3a8f', letterSpacing: -1 }}>BOM</div>
-              <div style={{ fontSize: '0.7rem', color: '#666', letterSpacing: 2, marginTop: 2 }}>MUMBAI</div>
+          }}
+        >
+          {/* Ticket Card to Capture */}
+          <div
+            ref={passRef}
+            style={{
+              width: '100%',
+              background: 'linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%)',
+              borderRadius: 20,
+              boxShadow: '0 30px 80px rgba(0,60,120,0.4), 0 0 0 1px rgba(255,255,255,0.3)',
+              overflow: 'hidden',
+              fontFamily: "'Outfit', sans-serif",
+              position: 'relative',
+            }}
+          >
+            <div style={{
+              background: 'linear-gradient(90deg, #1a3a8f 0%, #0066cc 50%, #1a3a8f 100%)',
+              padding: '14px 24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+              <img src={indigoLogo} alt="IndiGo" style={{ height: 66, objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
+              <div style={{ color: '#ffe97a', fontWeight: 700, fontSize: '0.85rem', letterSpacing: 3 }}>BOARDING PASS</div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <div style={{ fontSize: '1.6rem' }}>✈</div>
-              <div style={{ width: 80, height: 2, background: 'linear-gradient(90deg, #1a3a8f, #0099ff)' }} />
-              <div style={{ fontSize: '0.65rem', color: '#888', letterSpacing: 1 }}>NON-STOP</div>
-            </div>
-            <div style={{ flex: 1, textAlign: 'center' }}>
-              <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#0066cc', letterSpacing: -1 }}>SKY</div>
-              <div style={{ fontSize: '0.7rem', color: '#666', letterSpacing: 2, marginTop: 2 }}>THE WORLD</div>
-            </div>
-          </div>
 
-          <div style={{ position: 'relative', height: 28, margin: '0 -1px' }}>
-            <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, borderTop: '2px dashed #cce0ff', transform: 'translateY(-50%)' }} />
-            <div style={{ position: 'absolute', top: '50%', left: -14, width: 28, height: 28, borderRadius: '50%', background: 'transparent', boxShadow: '0 0 0 28px white', transform: 'translateY(-50%)' }} />
-            <div style={{ position: 'absolute', top: '50%', right: -14, width: 28, height: 28, borderRadius: '50%', background: 'transparent', boxShadow: '0 0 0 28px white', transform: 'translateY(-50%)' }} />
-          </div>
-
-          <div style={{ padding: '16px 24px 20px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-            {[
-              { label: 'PASSENGER', value: name || '' },
-              { label: 'FLIGHT', value: '6E-2026' },
-              { label: 'SEAT', value: '1A' },
-              { label: 'CLASS', value: 'FRIENDSHIP' },
-              { label: 'GATE', value: 'BESTIEEEE' },
-              { label: 'BOARDING', value: 'NOW' },
-            ].map(({ label, value }) => (
-              <div key={label}>
-                <div style={{ fontSize: '0.6rem', color: '#999', letterSpacing: 2, marginBottom: 2 }}>{label}</div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1a3a8f' }}>{value}</div>
+            <div style={{ padding: '20px 24px', display: 'flex', gap: 20, alignItems: 'center' }}>
+              <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#1a3a8f', letterSpacing: -1 }}>BOM</div>
+                <div style={{ fontSize: '0.7rem', color: '#666', letterSpacing: 2, marginTop: 2 }}>MUMBAI</div>
               </div>
-            ))}
-          </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <div style={{ fontSize: '1.6rem' }}>✈</div>
+                <div style={{ width: 80, height: 2, background: 'linear-gradient(90deg, #1a3a8f, #0099ff)' }} />
+                <div style={{ fontSize: '0.65rem', color: '#888', letterSpacing: 1 }}>NON-STOP</div>
+              </div>
+              <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#0066cc', letterSpacing: -1 }}>SKY</div>
+                <div style={{ fontSize: '0.7rem', color: '#666', letterSpacing: 2, marginTop: 2 }}>THE WORLD</div>
+              </div>
+            </div>
 
-          <div style={{
-            background: '#f8faff',
-            borderTop: '1px solid #e0eeff',
-            padding: '12px 24px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 16,
-          }}>
-            <div style={{ display: 'flex', gap: 2 }}>
-              {Array.from({ length: 30 }).map((_, i) => (
-                <div key={i} style={{
-                  width: i % 3 === 0 ? 3 : 2,
-                  height: 36,
-                  background: '#1a3a8f',
-                  opacity: 0.7 + (i % 3) * 0.1,
-                }} />
+            <div style={{ position: 'relative', height: 28, margin: '0 -1px' }}>
+              <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, borderTop: '2px dashed #cce0ff', transform: 'translateY(-50%)' }} />
+              <div style={{ position: 'absolute', top: '50%', left: -14, width: 28, height: 28, borderRadius: '50%', background: 'transparent', boxShadow: '0 0 0 28px white', transform: 'translateY(-50%)' }} />
+              <div style={{ position: 'absolute', top: '50%', right: -14, width: 28, height: 28, borderRadius: '50%', background: 'transparent', boxShadow: '0 0 0 28px white', transform: 'translateY(-50%)' }} />
+            </div>
+
+            <div style={{ padding: '16px 24px 20px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+              {[
+                { label: 'PASSENGER', value: name || '' },
+                { label: 'FLIGHT', value: '6E-2026' },
+                { label: 'SEAT', value: '1A' },
+                { label: 'CLASS', value: 'FRIENDSHIP' },
+                { label: 'GATE', value: 'CS LINE TRAINER' },
+                { label: 'BOARDING', value: 'NOW' },
+              ].map(({ label, value }) => (
+                <div key={label}>
+                  <div style={{ fontSize: '0.6rem', color: '#999', letterSpacing: 2, marginBottom: 2 }}>{label}</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1a3a8f' }}>{value}</div>
+                </div>
               ))}
             </div>
-            <div style={{ fontSize: '0.65rem', color: '#aaa', letterSpacing: 1 }}>6E 2026 001</div>
+
+            <div style={{
+              background: '#f8faff',
+              borderTop: '1px solid #e0eeff',
+              padding: '12px 24px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 16,
+            }}>
+              <div style={{ display: 'flex', gap: 2 }}>
+                {Array.from({ length: 30 }).map((_, i) => (
+                  <div key={i} style={{
+                    width: i % 3 === 0 ? 3 : 2,
+                    height: 36,
+                    background: '#1a3a8f',
+                    opacity: 0.7 + (i % 3) * 0.1,
+                  }} />
+                ))}
+              </div>
+              <div style={{ fontSize: '0.65rem', color: '#aaa', letterSpacing: 1 }}>6E 2026 001</div>
+            </div>
           </div>
-        </div>
-      </motion.div>
-    )}
-  </AnimatePresence>
-);
+
+          {/* Download Pass Button */}
+          <motion.button
+            whileHover={{ scale: 1.05, boxShadow: '0 12px 30px rgba(0, 102, 204, 0.4)' }}
+            whileTap={{ scale: 0.96 }}
+            onClick={handleDownload}
+            disabled={downloading}
+            style={{
+              marginTop: 18,
+              padding: '12px 26px',
+              borderRadius: 50,
+              background: downloadSuccess
+                ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                : 'linear-gradient(135deg, #1a3a8f 0%, #0066cc 100%)',
+              color: 'white',
+              border: 'none',
+              cursor: downloading ? 'not-allowed' : 'pointer',
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: '0.92rem',
+              fontWeight: 700,
+              letterSpacing: 1,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              boxShadow: downloadSuccess
+                ? '0 8px 25px rgba(16, 185, 129, 0.4)'
+                : '0 8px 25px rgba(0, 102, 204, 0.3)',
+              transition: 'all 0.3s ease',
+            }}
+          >
+            {downloading ? (
+              <>
+                <motion.span
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  style={{ display: 'inline-block' }}
+                >
+                  ⏳
+                </motion.span>
+                <span>Generating Pass...</span>
+              </>
+            ) : downloadSuccess ? (
+              <>
+                <span>✅</span>
+                <span>Pass Downloaded!</span>
+              </>
+            ) : (
+              <>
+                <span style={{ fontSize: '1.1rem' }}>📥</span>
+                <span>Download Boarding Pass</span>
+              </>
+            )}
+          </motion.button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 
 /* ─────────────────────────────────────────
    Main FlightCard
