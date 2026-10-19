@@ -275,6 +275,432 @@ const BoardingPass = ({ name, visible }) => {
 
 
 /* ─────────────────────────────────────────
+   Flight Attendant Praise Flip Cards Section
+───────────────────────────────────────── */
+const PRAISE_CARDS = [
+  {
+    id: 1,
+    icon: '⏰',
+    tag: '01 • SLEEP SACRIFICE',
+    frontTitle: 'The Fun & Smiles',
+    frontText: 'Being a flight attendant looks like pure fun, glamour, and soaring excitement...',
+    backTitle: 'Waking When the World Sleeps',
+    backText: '...constantly waking up at ungodly hours when the rest of the world is fast asleep, gathering all your energy to safely fly hundreds of souls.',
+    praise: 'Your morning discipline & sheer dedication is unmatched! 🌟',
+    badgeColor: '#00d4ff',
+  },
+  {
+    id: 2,
+    icon: '🤝',
+    tag: '02 • FLEETING BONDS',
+    frontTitle: 'New Faces Daily',
+    frontText: 'Meeting exciting new crew members and passengers on every single route...',
+    backTitle: 'A New Crew, Then Goodbye',
+    backText: '...meeting a brand new crew every single day, but after a flight parting ways and not seeing them again. Giving your heart to fleeting moments.',
+    praise: 'It takes a special heart to bring genuine warmth to brief hours! 💙',
+    badgeColor: '#ffe97a',
+  },
+  {
+    id: 3,
+    icon: '🎂',
+    tag: '03 • HOLIDAYS & CELEBRATIONS',
+    frontTitle: 'The Permanent Holiday Myth',
+    frontText: 'Everyone thinks you are always on a holiday living the jetsetter life...',
+    backTitle: 'Working While Others Celebrate',
+    backText: '...you actually work through festivals, birthdays, and weekends away from loved ones, sacrificing your holidays so others can fly home to theirs.',
+    praise: 'A selfless, golden soul who brings families together! ✨',
+    badgeColor: '#ff9ebb',
+  },
+  {
+    id: 4,
+    icon: '🏨',
+    tag: '04 • LAYOVER REALITY',
+    frontTitle: 'Luxurious Layovers',
+    frontText: 'Layovers are pictured as glamorous vacations in fancy 5-star hotels...',
+    backTitle: '24 Hours & Aching Feet',
+    backText: '...they are often just 24 hours confined to a quiet hotel room, nursing aching feet and total body exhaustion after standing for hours on end.',
+    praise: 'Your silent resilience and physical grit are truly heroic! 🛡️',
+    badgeColor: '#70e000',
+  },
+  {
+    id: 5,
+    icon: '🤍',
+    tag: '05 • PRECIOUS CONNECTIONS',
+    frontTitle: 'Dearest Friends',
+    frontText: 'Meeting fascinating people everywhere who happen to become close friends...',
+    backTitle: 'Missing Those Who Matter Most',
+    backText: '...having close friends who mean the absolute world to you, but having so little time to give them because your demanding roster takes it all.',
+    praise: 'Distance and crazy schedules will never fade true love! 🫂',
+    badgeColor: '#ffd166',
+  },
+  {
+    id: 6,
+    icon: '🌍',
+    tag: '06 • SEEING THE WORLD',
+    frontTitle: 'Breathtaking Destinations',
+    frontText: 'Flying across borders and seeing the most beautiful cities from high above...',
+    backTitle: 'Beautiful Places, Alone & Tired',
+    backText: '...seeing beautiful places, but mostly seeing them all alone and exhausted, running on pure caffeine while missing the comfort of your own bed.',
+    praise: 'The bravest, most admirable woman in the skies! 👑',
+    badgeColor: '#00b4d8',
+  },
+];
+
+const FlipCardItem = ({ card, isFlipped, onToggle }) => {
+  return (
+    <div
+      onClick={onToggle}
+      style={{
+        perspective: 1200,
+        cursor: 'pointer',
+        height: 295,
+        width: '100%',
+      }}
+    >
+      <motion.div
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.65, ease: [0.23, 1, 0.32, 1] }}
+        style={{
+          width: '100%',
+          height: '100%',
+          position: 'relative',
+          transformStyle: 'preserve-3d',
+        }}
+      >
+        {/* ── FRONT: What the world sees ── */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            borderRadius: 20,
+            background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 248, 255, 0.9) 100%)',
+            boxShadow: '0 15px 35px rgba(0, 70, 150, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.8) inset',
+            border: '1px solid rgba(0, 102, 204, 0.15)',
+            padding: '20px 22px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            backdropFilter: 'blur(10px)',
+            transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <span style={{
+                fontSize: '0.65rem',
+                fontWeight: 800,
+                letterSpacing: 2,
+                color: '#0066cc',
+                background: 'rgba(0, 102, 204, 0.08)',
+                padding: '4px 10px',
+                borderRadius: 20,
+              }}>
+                {card.tag}
+              </span>
+              <span style={{ fontSize: '1.6rem' }}>{card.icon}</span>
+            </div>
+
+            <div style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              color: '#8899a6',
+              letterSpacing: 1.5,
+              textTransform: 'uppercase',
+              marginBottom: 4,
+            }}>
+              What People Think ✦
+            </div>
+
+            <h3 style={{
+              margin: '0 0 8px 0',
+              fontSize: '1.15rem',
+              fontWeight: 800,
+              color: '#1a3a8f',
+              lineHeight: 1.25,
+            }}>
+              {card.frontTitle}
+            </h3>
+
+            <p style={{
+              margin: 0,
+              fontSize: '0.88rem',
+              color: '#334e68',
+              lineHeight: 1.55,
+              fontWeight: 500,
+            }}>
+              {card.frontText}
+            </p>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingTop: 10,
+            borderTop: '1px dashed rgba(0, 102, 204, 0.15)',
+          }}>
+            <span style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              color: '#0066cc',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+            }}>
+              <span>🔄</span> Tap to reveal the reality
+            </span>
+            <span style={{
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              color: '#999',
+              background: '#eef5fc',
+              padding: '2px 8px',
+              borderRadius: 12,
+            }}>
+              FLIP ⇄
+            </span>
+          </div>
+        </div>
+
+        {/* ── BACK: The Tough Reality & Praise ── */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)',
+            borderRadius: 20,
+            background: 'linear-gradient(145deg, #0d1b3e 0%, #162a60 60%, #102347 100%)',
+            boxShadow: '0 15px 35px rgba(10, 25, 60, 0.4), 0 0 0 1px rgba(255, 233, 122, 0.3) inset',
+            border: '1px solid rgba(255, 233, 122, 0.35)',
+            padding: '20px 22px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            color: 'white',
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <span style={{
+                fontSize: '0.65rem',
+                fontWeight: 800,
+                letterSpacing: 2,
+                color: '#ffe97a',
+                background: 'rgba(255, 233, 122, 0.15)',
+                padding: '4px 10px',
+                borderRadius: 20,
+                border: '1px solid rgba(255, 233, 122, 0.3)',
+              }}>
+                ✦ THE TOUGH REALITY
+              </span>
+              <span style={{ fontSize: '1.4rem' }}>⭐</span>
+            </div>
+
+            <h3 style={{
+              margin: '0 0 8px 0',
+              fontSize: '1.05rem',
+              fontWeight: 800,
+              color: '#ffe97a',
+              lineHeight: 1.25,
+            }}>
+              {card.backTitle}
+            </h3>
+
+            <p style={{
+              margin: 0,
+              fontSize: '0.84rem',
+              color: '#d6e4ff',
+              lineHeight: 1.5,
+              fontWeight: 400,
+            }}>
+              {card.backText}
+            </p>
+          </div>
+
+          <div>
+            {/* Praise pill */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.08)',
+              borderLeft: '3px solid #ffe97a',
+              padding: '6px 10px',
+              borderRadius: '0 10px 10px 0',
+              marginBottom: 10,
+              fontSize: '0.74rem',
+              fontWeight: 600,
+              color: '#fff',
+              lineHeight: 1.35,
+            }}>
+              {card.praise}
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingTop: 8,
+              borderTop: '1px dashed rgba(255, 255, 255, 0.15)',
+            }}>
+              <span style={{
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                color: '#90b4ce',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+              }}>
+                <span>↺</span> Tap to flip back
+              </span>
+              <span style={{
+                fontSize: '0.62rem',
+                fontWeight: 700,
+                color: '#ffe97a',
+                background: 'rgba(255, 233, 122, 0.18)',
+                padding: '2px 8px',
+                borderRadius: 12,
+              }}>
+                BACK
+              </span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+const FlightAttendantPraiseCards = ({ visible }) => {
+  const [flippedMap, setFlippedMap] = useState({});
+  const [allFlipped, setAllFlipped] = useState(false);
+
+  const toggleSingle = (id) => {
+    setFlippedMap(prev => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const handleToggleAll = () => {
+    const nextState = !allFlipped;
+    setAllFlipped(nextState);
+    const newMap = {};
+    PRAISE_CARDS.forEach(c => {
+      newMap[c.id] = nextState;
+    });
+    setFlippedMap(newMap);
+  };
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 50 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
+          style={{
+            width: '100%',
+            maxWidth: 620,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 20,
+            margin: '10px 0 0',
+          }}
+        >
+          {/* Header */}
+          <div style={{ textAlign: 'center', padding: '0 10px' }}>
+            <div style={{
+              display: 'inline-block',
+              background: 'linear-gradient(135deg, #1a3a8f 0%, #0066cc 100%)',
+              borderRadius: 50,
+              padding: '6px 18px',
+              marginBottom: 10,
+              boxShadow: '0 4px 15px rgba(0, 102, 204, 0.25)',
+            }}>
+              <span style={{ color: '#ffe97a', fontSize: '0.72rem', fontWeight: 800, letterSpacing: 2.5 }}>
+                ✦ THE WINGS BEHIND THE SMILE ✦
+              </span>
+            </div>
+
+            <h2 style={{
+              margin: '0 0 8px',
+              fontSize: 'clamp(1.5rem, 5vw, 2.1rem)',
+              fontWeight: 900,
+              color: '#1a3a8f',
+              letterSpacing: -0.5,
+              lineHeight: 1.2,
+            }}>
+              What It Really Takes ✈️
+            </h2>
+
+            <p style={{
+              margin: '0 auto',
+              maxWidth: 480,
+              fontSize: 'clamp(0.85rem, 2.3vw, 0.96rem)',
+              color: '#2d5aa0',
+              lineHeight: 1.6,
+            }}>
+              The world only sees the effortless smile and high-flying glamour, but here's to the incredible resilience, sacrifices, and strength you carry every single day:
+            </p>
+
+            {/* Quick Actions / Flip All Toggle */}
+            <div style={{ marginTop: 14, display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleToggleAll}
+                style={{
+                  padding: '8px 20px',
+                  borderRadius: 50,
+                  border: '1px solid rgba(0, 102, 204, 0.3)',
+                  background: allFlipped
+                    ? 'linear-gradient(135deg, #0d1b3e, #1a3a8f)'
+                    : 'white',
+                  color: allFlipped ? '#ffe97a' : '#0066cc',
+                  fontFamily: "'Outfit', sans-serif",
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 15px rgba(0, 102, 204, 0.15)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                <span>{allFlipped ? '↺' : '🔄'}</span>
+                <span>{allFlipped ? 'Flip Back to Front' : 'Flip All to Reveal Truth'}</span>
+              </motion.button>
+            </div>
+          </div>
+
+          {/* ── Cards Grid ── */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: 16,
+            width: '100%',
+          }}>
+            {PRAISE_CARDS.map(card => (
+              <FlipCardItem
+                key={card.id}
+                card={card}
+                isFlipped={!!flippedMap[card.id]}
+                onToggle={() => toggleSingle(card.id)}
+              />
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+/* ─────────────────────────────────────────
    Main FlightCard
 ───────────────────────────────────────── */
 const FlightCard = ({ name = "Trisha Saha" }) => {
@@ -698,7 +1124,10 @@ const FlightCard = ({ name = "Trisha Saha" }) => {
           {/* Boarding Pass */}
           <BoardingPass name={name} visible={showBoardingPass} />
 
-          {/* Message card */}
+          {/* Praise & Tough Reality Flipping Cards */}
+          <FlightAttendantPraiseCards visible={showMessage} />
+
+          {/* Unified Tribute & Message Section */}
           <AnimatePresence>
             {showMessage && (
               <motion.div
@@ -707,31 +1136,67 @@ const FlightCard = ({ name = "Trisha Saha" }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 1.0 }}
                 style={{
-                  background: 'rgba(255,255,255,0.85)',
-                  backdropFilter: 'blur(12px)',
-                  borderRadius: 20,
-                  padding: '24px 28px',
+                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 248, 255, 0.92) 100%)',
+                  backdropFilter: 'blur(16px)',
+                  borderRadius: 24,
+                  padding: '30px 28px',
                   width: '100%',
-                  boxShadow: '0 20px 60px rgba(0,60,120,0.2)',
-                  border: '1px solid rgba(255,255,255,0.9)',
+                  boxShadow: '0 25px 60px rgba(0, 60, 140, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.8) inset',
+                  border: '1.5px solid rgba(0, 102, 204, 0.16)',
                   textAlign: 'center',
                 }}
               >
-                <div style={{ fontSize: '1.8rem', marginBottom: 10 }}>💙</div>
+                {/* Part 1: Tribute To Her True Strength */}
+                <div style={{ fontSize: '1.8rem', marginBottom: 8 }}>👑✈️💙</div>
+                <div style={{
+                  fontSize: '1.15rem',
+                  fontWeight: 900,
+                  color: '#1a3a8f',
+                  marginBottom: 8,
+                  letterSpacing: -0.3,
+                }}>
+                  A Tribute To Your True Strength
+                </div>
                 <p style={{
-                  fontSize: 'clamp(0.85rem, 2.2vw, 1rem)',
+                  margin: 0,
+                  fontSize: 'clamp(0.85rem, 2.2vw, 0.96rem)',
+                  color: '#2d5aa0',
+                  lineHeight: 1.68,
+                  fontStyle: 'italic',
+                }}>
+                  "Behind every smooth flight and warm greeting is a woman made of pure grit, immense patience, and heart of gold. You make it look so effortless, but we see how hard you work. Never stop being proud of the flight attendant and wonder woman you are!"
+                </p>
+
+                {/* Elegant Aviation Divider */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 14,
+                  margin: '22px 0 20px',
+                }}>
+                  <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, rgba(0, 102, 204, 0.25))' }} />
+                  <span style={{ fontSize: '1rem', color: '#0066cc', transform: 'rotate(45deg)', display: 'inline-block' }}>✈️</span>
+                  <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, transparent, rgba(0, 102, 204, 0.25))' }} />
+                </div>
+
+                {/* Part 2: Heartfelt Personal Wish */}
+                <p style={{
+                  fontSize: 'clamp(0.88rem, 2.3vw, 1.02rem)',
                   color: '#1a3a6c',
                   lineHeight: 1.8,
                   margin: 0,
                   fontStyle: 'italic',
+                  fontWeight: 500,
                 }}>
                   "The sky is not the limit always remember that. Thank you for being you. Keep flying high and making every journey magical bebo 🌟"
                 </p>
-                <div style={{ marginTop: 16, fontWeight: 700, color: '#0066cc', fontSize: '0.9rem' }}>
+                <div style={{ marginTop: 16, fontWeight: 700, color: '#0066cc', fontSize: '0.92rem' }}>
                   — With lots of love & lots of sky-high wishes 💙✈️
                 </div>
 
-                <div style={{ marginTop: 20, display: 'flex', justifyContent: 'center', gap: 16 }}>
+                {/* Floating animated emojis */}
+                <div style={{ marginTop: 22, display: 'flex', justifyContent: 'center', gap: 16 }}>
                   {['✈️', '⭐', '🌤️', '💙', '🛫'].map((emoji, i) => (
                     <motion.span key={i}
                       animate={{ y: [0, -8, 0] }}
