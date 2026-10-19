@@ -7,6 +7,7 @@ import indigoLogo from '../assets/indigologo.png';
 import indigoTune from '../assets/indigo-tune.mp3';
 import picShot from '../assets/picshot.png';
 import html2canvas from 'html2canvas';
+import AircraftCabin3D from './AircraftCabin3D';
 
 /* ─────────────────────────────────────────
    Cloud SVG helper
@@ -708,10 +709,37 @@ const FlightCard = ({ name = "Trisha Saha" }) => {
   const [showBoardingPass, setShowBoardingPass] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
+  const [isPlayingTune, setIsPlayingTune] = useState(false);
   const audioRef = useRef(null);
   const { width, height } = useWindowSize();
 
+  const startIndigoTune = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 32;
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => setIsPlayingTune(true))
+          .catch((err) => console.warn("Audio playback blocked:", err));
+      }
+    }
+  };
+
+  const toggleTune = () => {
+    if (!audioRef.current) return;
+    if (isPlayingTune) {
+      audioRef.current.pause();
+      setIsPlayingTune(false);
+    } else {
+      audioRef.current.play().then(() => setIsPlayingTune(true)).catch(() => {});
+    }
+  };
+
   const handleTakeoff = () => {
+    // If not already playing, start tune immediately
+    if (audioRef.current && !isPlayingTune) {
+      startIndigoTune();
+    }
     setPhase('takeoff');
     setTimeout(() => {
       setPhase('sky');
@@ -719,16 +747,17 @@ const FlightCard = ({ name = "Trisha Saha" }) => {
       setTimeout(() => setShowBoardingPass(true), 600);
       setTimeout(() => setShowMessage(true), 1200);
       setTimeout(() => setShowConfetti(false), 7000);
-      // Auto-play IndiGo tune from 0:32
-      if (audioRef.current) {
+      // Ensure tune is running from 0:32
+      if (audioRef.current && audioRef.current.paused) {
         audioRef.current.currentTime = 32;
-        audioRef.current.play().catch(() => {});
+        audioRef.current.play().then(() => setIsPlayingTune(true)).catch(() => {});
       }
     }, 3200);
   };
 
   const bgStyle = {
     tarmac: 'linear-gradient(to bottom, #0a0a1a 0%, #0d1b3e 40%, #16213e 70%, #1a2a3a 100%)',
+    cabin: '#030818',
     takeoff: 'linear-gradient(to bottom, #0d1b3e 0%, #1a3a7a 30%, #2d6ab5 70%, #4a9fd4 100%)',
     sky: 'linear-gradient(to bottom, #87ceeb 0%, #b8e4f7 30%, #d4f1ff 60%, #e8f8ff 100%)',
   };
@@ -950,27 +979,50 @@ const FlightCard = ({ name = "Trisha Saha" }) => {
               }} />
             </motion.div>
 
-            <motion.button
-              whileHover={{ scale: 1.07, boxShadow: '0 20px 60px rgba(0,180,255,0.6)' }}
-              whileTap={{ scale: 0.97 }}
-              onClick={handleTakeoff}
-              style={{
-                padding: '18px 48px',
-                fontSize: 'clamp(1rem, 3vw, 1.3rem)',
-                fontWeight: 700,
-                fontFamily: "'Outfit', sans-serif",
-                background: 'linear-gradient(135deg, #0066cc 0%, #00a8ff 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: 50,
-                cursor: 'pointer',
-                boxShadow: '0 10px 40px rgba(0,130,255,0.5)',
-                letterSpacing: 1,
-              }}
-            >
-              🛫 Open the Card
-            </motion.button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, alignItems: 'center' }}>
+              <motion.button
+                whileHover={{ scale: 1.07, boxShadow: '0 20px 60px rgba(0,180,255,0.6)' }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setPhase('cabin')}
+                style={{
+                  padding: '18px 44px',
+                  fontSize: 'clamp(0.95rem, 2.8vw, 1.25rem)',
+                  fontWeight: 800,
+                  fontFamily: "'Outfit', sans-serif",
+                  background: 'linear-gradient(135deg, #0066cc 0%, #00d4ff 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 50,
+                  cursor: 'pointer',
+                  boxShadow: '0 12px 45px rgba(0,130,255,0.6)',
+                  letterSpacing: 0.8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                }}
+              >
+                Select Your Seat
+              </motion.button>
+            </div>
           </motion.div>
+        </div>
+      )}
+
+      {/* ── 3D AIRCRAFT CABIN & AISLE WALKTHROUGH ── */}
+      {phase === 'cabin' && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 30,
+          width: '100vw',
+          height: '100vh',
+        }}>
+          <AircraftCabin3D
+            name={name}
+            onStartAudio={startIndigoTune}
+            onSeatConfirmed={handleTakeoff}
+            onSkip={handleTakeoff}
+          />
         </div>
       )}
 
@@ -1211,7 +1263,6 @@ const FlightCard = ({ name = "Trisha Saha" }) => {
             )}
           </AnimatePresence>
 
-          {/* Music button removed — tune auto-plays on sky entry */}
         </div>
       )}
 
