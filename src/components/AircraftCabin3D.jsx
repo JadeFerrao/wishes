@@ -811,7 +811,7 @@ export default function AircraftCabin3D({
                   color: 'rgba(200, 230, 255, 0.9)',
                   lineHeight: 1.5,
                 }}>
-                  Special First-Row Cabin Station reserved in honor of your dedication, elegance, and perseverance in the skies.
+                  Special seat reserved in honor of your dedication, elegance, and perseverance in the skies.
                 </p>
 
                 {seatbeltFastened ? (

@@ -8,6 +8,8 @@ import indigoTune from '../assets/indigo-tune.mp3';
 import picShot from '../assets/picshot.png';
 import html2canvas from 'html2canvas';
 import AircraftCabin3D from './AircraftCabin3D';
+import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 /* ─────────────────────────────────────────
    Cloud SVG helper
@@ -575,23 +577,12 @@ const FlipCardItem = ({ card, isFlipped, onToggle }) => {
 
 const FlightAttendantPraiseCards = ({ visible }) => {
   const [flippedMap, setFlippedMap] = useState({});
-  const [allFlipped, setAllFlipped] = useState(false);
 
   const toggleSingle = (id) => {
     setFlippedMap(prev => ({
       ...prev,
       [id]: !prev[id],
     }));
-  };
-
-  const handleToggleAll = () => {
-    const nextState = !allFlipped;
-    setAllFlipped(nextState);
-    const newMap = {};
-    PRAISE_CARDS.forEach(c => {
-      newMap[c.id] = nextState;
-    });
-    setFlippedMap(newMap);
   };
 
   return (
@@ -648,35 +639,6 @@ const FlightAttendantPraiseCards = ({ visible }) => {
               The world only sees the effortless smile and high-flying glamour, but here's to the incredible resilience, sacrifices, and strength you carry every single day:
             </p>
 
-            {/* Quick Actions / Flip All Toggle */}
-            <div style={{ marginTop: 14, display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleToggleAll}
-                style={{
-                  padding: '8px 20px',
-                  borderRadius: 50,
-                  border: '1px solid rgba(0, 102, 204, 0.3)',
-                  background: allFlipped
-                    ? 'linear-gradient(135deg, #0d1b3e, #1a3a8f)'
-                    : 'white',
-                  color: allFlipped ? '#ffe97a' : '#0066cc',
-                  fontFamily: "'Outfit', sans-serif",
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 15px rgba(0, 102, 204, 0.15)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <span>{allFlipped ? '↺' : '🔄'}</span>
-                <span>{allFlipped ? 'Flip Back to Front' : 'Flip All to Reveal Truth'}</span>
-              </motion.button>
-            </div>
           </div>
 
           {/* ── Cards Grid ── */}
@@ -694,6 +656,442 @@ const FlightAttendantPraiseCards = ({ visible }) => {
                 onToggle={() => toggleSingle(card.id)}
               />
             ))}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+/* ─────────────────────────────────────────
+   In-Flight Airmail / Message Section to Jayden
+───────────────────────────────────────── */
+const InflightMailSection = ({ visible }) => {
+  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState('idle'); // 'idle' | 'sending' | 'sent' | 'error'
+  const [sentMessage, setSentMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const quickPills = [
+    "💙 You're the absolute best jade!",
+    "✈️ Proud of you always yaar!",
+    "🌟 Loved this surprise, truee bestiee!",
+    "🥰 Thank you for always cheering me up!",
+  ];
+
+  const handleAddPill = (pillText) => {
+    setMessage(prev => {
+      const trimmed = prev.trim();
+      return trimmed ? `${trimmed} ${pillText}` : pillText;
+    });
+  };
+
+  const handleSend = async (e) => {
+    if (e) e.preventDefault();
+    if (!message.trim()) {
+      alert("Please write a message before sending! ✈️💌");
+      return;
+    }
+
+    setStatus('sending');
+    setErrorMessage('');
+    const textToSend = message.trim();
+
+    try {
+      // 1. Submit to FormSubmit to deliver straight to tomsnicker007@gmail.com
+      const response = await fetch("https://formsubmit.co/ajax/tomsnicker007@gmail.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          _subject: "💌 In-flight Letter from Bebo (Trisha Sasha) for Jayden Ferrao",
+          Recipient: "Jayden Ferrao",
+          Sender: "Trisha Sasha (aka Bebo)",
+          Message: textToSend,
+          _captcha: "false",
+          _template: "table",
+        }),
+      });
+
+      // 2. Also back up to Firestore database
+      try {
+        await addDoc(collection(db, "inbox_messages"), {
+          to: "Jayden Ferrao",
+          from: "Trisha Sasha (aka Bebo)",
+          message: textToSend,
+          createdAt: serverTimestamp(),
+        });
+      } catch (fsErr) {
+        console.warn("Firestore backup note:", fsErr);
+      }
+
+      setSentMessage(textToSend);
+      setMessage('');
+      setStatus('sent');
+    } catch (err) {
+      console.error("Error sending message:", err);
+      // Fallback: Still attempt firestore backup
+      try {
+        await addDoc(collection(db, "inbox_messages"), {
+          to: "Jayden Ferrao",
+          from: "Trisha Sasha (aka Bebo)",
+          message: textToSend,
+          createdAt: serverTimestamp(),
+        });
+        setSentMessage(textToSend);
+        setMessage('');
+        setStatus('sent');
+      } catch (fsErr) {
+        setStatus('error');
+        setErrorMessage("Couldn't send automatically right now. Please try again or open your mail app.");
+      }
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          key="inflight-mail"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.1 }}
+          style={{
+            width: '100%',
+            maxWidth: 620,
+            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(244, 249, 255, 0.95) 100%)',
+            backdropFilter: 'blur(16px)',
+            borderRadius: 24,
+            boxShadow: '0 25px 60px rgba(0, 60, 140, 0.16), 0 0 0 1px rgba(255, 255, 255, 0.9) inset',
+            border: '1.5px solid rgba(0, 102, 204, 0.18)',
+            overflow: 'hidden',
+            margin: '10px 0 20px',
+            position: 'relative',
+          }}
+        >
+          {/* Classic Airmail Border Ribbon */}
+          <div style={{
+            height: 9,
+            width: '100%',
+            background: 'repeating-linear-gradient(135deg, #0066cc 0px, #0066cc 16px, #ffffff 16px, #ffffff 26px, #d32f2f 26px, #d32f2f 42px, #ffffff 42px, #ffffff 52px)',
+          }} />
+
+          <div style={{ padding: '26px 24px 28px' }}>
+            {/* Header: Stamp & Title */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              gap: 12,
+              marginBottom: 18,
+              flexWrap: 'wrap',
+            }}>
+              <div style={{ flex: 1, minWidth: 200, textAlign: 'left' }}>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  background: 'rgba(0, 102, 204, 0.08)',
+                  color: '#0066cc',
+                  padding: '4px 12px',
+                  borderRadius: 20,
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  letterSpacing: 1.5,
+                  marginBottom: 6,
+                  textTransform: 'uppercase',
+                }}>
+                  <span>✈️</span>
+                  <span>In-Flight Dispatch • Airmail</span>
+                </div>
+                <h3 style={{
+                  margin: '4px 0 2px',
+                  fontSize: 'clamp(1.2rem, 3.5vw, 1.45rem)',
+                  fontWeight: 900,
+                  color: '#0d1b3e',
+                  letterSpacing: -0.3,
+                }}>
+                  Send a Letter to Jayden 💌
+                </h3>
+                <p style={{
+                  margin: 0,
+                  fontSize: '0.84rem',
+                  color: '#4a6b99',
+                  lineHeight: 1.4,
+                }}>
+                  Leave a personal message, secret thought, or warm reply!
+                </p>
+              </div>
+
+              {/* Vintage Postage Stamp */}
+              <div style={{
+                border: '2px dashed rgba(0, 102, 204, 0.4)',
+                borderRadius: 10,
+                padding: '6px 12px',
+                background: 'rgba(0, 102, 204, 0.04)',
+                textAlign: 'center',
+                minWidth: 80,
+                alignSelf: 'flex-start',
+              }}>
+                <div style={{ fontSize: '1.2rem', lineHeight: 1 }}>✈️</div>
+                <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#0066cc', letterSpacing: 1, marginTop: 2 }}>
+                  PAR AVION
+                </div>
+                <div style={{ fontSize: '0.52rem', fontWeight: 700, color: '#688db5' }}>
+                  PRIORITY 6E
+                </div>
+              </div>
+            </div>
+
+            {/* Letter Header: TO & FROM (Email hidden) */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.85)',
+              borderRadius: 14,
+              padding: '12px 16px',
+              border: '1px solid rgba(0, 102, 204, 0.14)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+              marginBottom: 18,
+              textAlign: 'left',
+              boxShadow: '0 2px 8px rgba(0, 60, 140, 0.04)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{
+                  background: 'linear-gradient(135deg, #1a3a8f, #0066cc)',
+                  color: '#ffffff',
+                  fontWeight: 800,
+                  fontSize: '0.68rem',
+                  letterSpacing: 1,
+                  padding: '3px 8px',
+                  borderRadius: 6,
+                  minWidth: 46,
+                  textAlign: 'center',
+                }}>
+                  TO
+                </span>
+                <span style={{ fontSize: '0.94rem', fontWeight: 700, color: '#0d1b3e' }}>
+                  Jayden Ferrao ( aka J / Bestuuu) 💙
+                </span>
+              </div>
+
+              <div style={{ height: 1, background: 'rgba(0, 102, 204, 0.08)' }} />
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{
+                  background: 'linear-gradient(135deg, #ff8c00, #e53935)',
+                  color: '#ffffff',
+                  fontWeight: 800,
+                  fontSize: '0.68rem',
+                  letterSpacing: 1,
+                  padding: '3px 8px',
+                  borderRadius: 6,
+                  minWidth: 46,
+                  textAlign: 'center',
+                }}>
+                  FROM
+                </span>
+                <span style={{ fontSize: '0.94rem', fontWeight: 700, color: '#0d1b3e' }}>
+                  Trisha Sasha (aka Bebo) ✈️✨
+                </span>
+              </div>
+            </div>
+
+            {/* If Already Sent */}
+            {status === 'sent' ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(230, 248, 237, 0.9) 0%, rgba(240, 253, 244, 0.95) 100%)',
+                  borderRadius: 16,
+                  border: '1.5px solid rgba(46, 125, 50, 0.25)',
+                  padding: '24px 20px',
+                  textAlign: 'center',
+                }}
+              >
+                <div style={{ fontSize: '2.4rem', marginBottom: 6 }}>💌✈️✨</div>
+                <h4 style={{
+                  margin: '0 0 6px',
+                  fontSize: '1.15rem',
+                  fontWeight: 800,
+                  color: '#1b5e20',
+                }}>
+                  Letter Flown to Jayden!
+                </h4>
+                <p style={{
+                  margin: '0 0 16px',
+                  fontSize: '0.86rem',
+                  color: '#2e7d32',
+                  lineHeight: 1.5,
+                }}>
+                  Your message has been sealed and delivered directly to Jayden.
+                </p>
+
+                {sentMessage && (
+                  <div style={{
+                    background: 'white',
+                    borderRadius: 12,
+                    padding: '12px 16px',
+                    fontSize: '0.88rem',
+                    color: '#1a3a6c',
+                    fontStyle: 'italic',
+                    border: '1px solid rgba(46, 125, 50, 0.2)',
+                    marginBottom: 16,
+                    textAlign: 'left',
+                    lineHeight: 1.5,
+                  }}>
+                    "{sentMessage}"
+                  </div>
+                )}
+
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => setStatus('idle')}
+                  style={{
+                    padding: '9px 20px',
+                    borderRadius: 50,
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #1a3a8f, #0066cc)',
+                    color: 'white',
+                    fontWeight: 700,
+                    fontSize: '0.84rem',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 15px rgba(0, 102, 204, 0.25)',
+                  }}
+                >
+                  Write Another Note ✍️
+                </motion.button>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSend} style={{ textAlign: 'left' }}>
+                {/* Quick suggestions pills */}
+                <div style={{
+                  display: 'flex',
+                  gap: 6,
+                  flexWrap: 'wrap',
+                  marginBottom: 10,
+                }}>
+                  {quickPills.map((pill, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => handleAddPill(pill)}
+                      style={{
+                        padding: '4px 10px',
+                        background: 'rgba(0, 102, 204, 0.06)',
+                        border: '1px solid rgba(0, 102, 204, 0.18)',
+                        borderRadius: 20,
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        color: '#0066cc',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      {pill}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Message Textarea */}
+                <div style={{ position: 'relative', marginBottom: 14 }}>
+                  <textarea
+                    rows={4}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Write your note, warm words, or reply for Jayden here... ✨"
+                    style={{
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      padding: '14px 16px',
+                      borderRadius: 14,
+                      border: '1.5px solid rgba(0, 102, 204, 0.22)',
+                      background: 'rgba(255, 255, 255, 0.95)',
+                      fontFamily: "'Outfit', sans-serif",
+                      fontSize: '0.92rem',
+                      color: '#0d1b3e',
+                      lineHeight: 1.6,
+                      resize: 'vertical',
+                      minHeight: 110,
+                      outline: 'none',
+                      boxShadow: 'inset 0 2px 4px rgba(0, 60, 140, 0.03)',
+                      transition: 'border 0.2s ease',
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#0066cc'}
+                    onBlur={(e) => e.target.style.borderColor = 'rgba(0, 102, 204, 0.22)'}
+                  />
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    fontSize: '0.72rem',
+                    color: '#7a94b8',
+                    marginTop: 4,
+                    padding: '0 4px',
+                  }}>
+                    <span>Private letter directly to Jayden</span>
+                    <span>{message.length} chars</span>
+                  </div>
+                </div>
+
+                {/* Error notice if needed */}
+                {status === 'error' && (
+                  <div style={{
+                    background: '#ffebee',
+                    color: '#c62828',
+                    padding: '8px 12px',
+                    borderRadius: 8,
+                    fontSize: '0.78rem',
+                    marginBottom: 12,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}>
+                    <span>{errorMessage}</span>
+                    <a
+                      href={`mailto:tomsnicker007@gmail.com?subject=Inflight%20Message%20from%20Bebo&body=${encodeURIComponent(message)}`}
+                      style={{ color: '#c62828', fontWeight: 700, textDecoration: 'underline', marginLeft: 8 }}
+                    >
+                      Open Mail
+                    </a>
+                  </div>
+                )}
+
+                {/* Action button */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 10 }}>
+                  <motion.button
+                    type="submit"
+                    disabled={status === 'sending'}
+                    whileHover={{ scale: status === 'sending' ? 1 : 1.03 }}
+                    whileTap={{ scale: status === 'sending' ? 1 : 0.97 }}
+                    style={{
+                      background: status === 'sending'
+                        ? 'linear-gradient(135deg, #7a94b8, #5a759e)'
+                        : 'linear-gradient(135deg, #1a3a8f 0%, #0066cc 100%)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: 50,
+                      padding: '12px 28px',
+                      fontFamily: "'Outfit', sans-serif",
+                      fontSize: '0.92rem',
+                      fontWeight: 800,
+                      cursor: status === 'sending' ? 'not-allowed' : 'pointer',
+                      boxShadow: '0 6px 20px rgba(0, 102, 204, 0.3)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    <span>{status === 'sending' ? '✈️' : '💌'}</span>
+                    <span>{status === 'sending' ? 'Dispatching across skies...' : 'Send Letter to Jayden'}</span>
+                  </motion.button>
+                </div>
+              </form>
+            )}
           </div>
         </motion.div>
       )}
@@ -1262,6 +1660,9 @@ const FlightCard = ({ name = "Trisha Saha" }) => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* In-Flight Airmail / Message Section to Jayden */}
+          <InflightMailSection visible={showMessage} />
 
         </div>
       )}
