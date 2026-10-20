@@ -30,19 +30,20 @@ function App() {
         const docRef = doc(db, 'shares', shareId)
         const docSnap = await getDoc(docRef)
 
-        // if (docSnap.exists()) {
-        //   setViewState('allowed') // Allows opening unlimited times without marking as viewed
-        //   }
-
         if (docSnap.exists()) {
-          const data = docSnap.data()
-          if (data.viewed) {
-            setViewState('denied')
-          } else {
-            await updateDoc(docRef, { viewed: true })
-            setViewState('allowed')
+          setViewState('allowed') // Allows opening unlimited times without marking as viewed
           }
-        } else {
+
+        // if (docSnap.exists()) {
+        //   const data = docSnap.data()
+        //   if (data.viewed) {
+        //     setViewState('denied')
+        //   } else {
+        //     await updateDoc(docRef, { viewed: true })
+        //     setViewState('allowed')
+        //   }
+        // } 
+        else {
           setViewState('denied')
         }
       } catch (error) {
