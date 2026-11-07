@@ -371,7 +371,7 @@ const SorryCard = () => {
                 margin: '0 0 16px 0',
                 fontWeight: '700'
               }}>
-                Hey Bestie... 🥺
+                Hey Bestieeee... 🥺
               </h3>
 
               {/* Friendship Apology Content */}
@@ -382,16 +382,18 @@ const SorryCard = () => {
                 fontSize: '1.35rem'
               }}>
                 <p style={{ margin: '0 0 16px 0' }}>
-                  I know ki you may be still annoyed but i really hope ki this friendship really stays strong yaar , and the last thing I ever want to do is mess things up or cause any arguement between us.
+                  I know ki you may be still annoyed & upset but i really hope ki this friendship really stays strong yaar , and the last thing I ever want to do is mess things up yaar bebo.
                 </p>
 
                 <p style={{ margin: '0 0 16px 0' }}>
-                  You are one special and genuine friend i happened to make yaar bebo. Our crazy gossips/ europe trips/grieving over hot girls or guys lmao, this bond means a lot yaar pagal, and I hate that it hurt you in this way, kabhi aaya nahi ki it would take a turn like this. 
-                  i really hope this doesnt ruin our frienship aise yaar. I hope im actually forgiven even if its a small misunderstanding between us haan.
+                  You are one special and genuine friend i happened to make yaar bebo. Our crazy gossips/ europe trips/grieving over hot girls or guys lmao, this bond means a lot yaar pagal, and I genuinely am sorriiee that i kade you upset yaar. i hope you can stop ignoring me yaar lol 
+                  atleast scold or something naa - dost hun tera ; so its fine honestly i wouldnt mind getting scolded yaar.
+                  i really hope this doesnt ruin our frienship aise yaar. i have some palns as well when you are down in goa sooo lemme knowww
+                  I hope im actually forgiven even if its a small misunderstanding between us haan.
                 </p>
 
                 <p style={{ margin: '0 0 22px 0', color: '#800f2f', fontWeight: 'bold' }}>
-                  I promise to be a better friend, and always have your back. Can we put this behind us abhi pleaseeeee ? 🤝✨
+                  I promise ill work on these tiny mistakesss, and always have your back. Can we put this behind us abhi pleaseeeee ? 🤝✨
                 </p>
               </div>
 

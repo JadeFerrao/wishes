@@ -10,7 +10,7 @@ import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from 'fir
 
 function App() {
   // Toggle between: 'birthday' | 'valentine' | 'friendship' | 'sorry' | 'flight'
-  const cardMode = 'flight'
+  const cardMode = 'sorry'
 
   const [viewState, setViewState] = useState('loading') // 'loading', 'allowed', 'denied', 'preview'
   const [generatedLink, setGeneratedLink] = useState('')
